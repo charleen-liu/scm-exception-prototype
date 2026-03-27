@@ -563,7 +563,11 @@
       background: #e8edf1; color: var(--label); border-radius: 10px;
       font-size: 11px; font-weight: 700; padding: 1px 7px; margin-left: 6px;
     }
-    .toolbar-filters { display: flex; gap: 8px; }
+    .toolbar-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .filter-showing {
+      font-size: 12px; color: var(--label); margin-left: 4px; white-space: nowrap;
+    }
+    .filter-showing strong { color: var(--title); font-weight: 600; }
 
   </style>
 </head>
@@ -783,26 +787,39 @@
 
       <!-- Exception List — cards -->
       <div class="list-toolbar">
-        <span class="list-title">Exception Inbox <span class="list-count">9</span></span>
+        <span class="list-title">Exception Inbox <span class="list-count" id="inboxCount">9</span></span>
         <div class="toolbar-filters">
-          <select class="filter-select">
+          <select class="filter-select" id="filterType" onchange="applyFilters()">
             <option value="all">All Types</option>
-            <option value="forecast">Forecast</option>
-            <option value="oc">Order Confirmation</option>
-            <option value="asn">ASN</option>
+            <option value="Forecast">Forecast</option>
+            <option value="OC">Order Confirmation</option>
+            <option value="ASN">ASN</option>
+            <option value="Quality">Quality</option>
           </select>
-          <select class="filter-select">
+          <select class="filter-select" id="filterSupplier" onchange="applyFilters()">
             <option value="all">All Suppliers</option>
             <option value="volterra">Volterra Components</option>
+            <option value="apex">Apex Precision</option>
             <option value="global">Global Parts Ltd</option>
+            <option value="simco">Simco Electronics</option>
+            <option value="meridian">Meridian Fasteners</option>
+            <option value="crestline">Crestline Supply</option>
+            <option value="precision">Precision Metals</option>
           </select>
+          <select class="filter-select" id="filterPriority" onchange="applyFilters()">
+            <option value="all">All Priorities</option>
+            <option value="urgent">Urgent</option>
+            <option value="high">High</option>
+            <option value="resolved">Resolved only</option>
+          </select>
+          <span class="filter-showing">Showing <strong id="filterShowCount">9</strong> of <strong>1,247</strong></span>
         </div>
       </div>
 
       <div class="exc-list" id="excList">
 
         <!-- Card 1 — Forecast shortage (Urgent) -->
-        <div class="exc-card urgent-card" id="exc1">
+        <div class="exc-card urgent-card" id="exc1" data-type="Forecast" data-supplier="volterra" data-priority="urgent">
           <div class="exc-badge-col">
             <span class="exc-badge badge-urgent" id="badge1">Urgent</span>
             <span class="exc-type-tag">Forecast</span>
@@ -843,7 +860,7 @@
         </div>
 
         <!-- Card 2 — Hard ship date breach (Urgent) -->
-        <div class="exc-card urgent-card" id="exc2">
+        <div class="exc-card urgent-card" id="exc2" data-type="ASN" data-supplier="apex" data-priority="urgent">
           <div class="exc-badge-col">
             <span class="exc-badge badge-urgent" id="badge2">Urgent</span>
             <span class="exc-type-tag">ASN</span>
@@ -877,7 +894,7 @@
         </div>
 
         <!-- Card 3 — OC Deviations batch (High) -->
-        <div class="exc-card high-card" id="exc3">
+        <div class="exc-card high-card" id="exc3" data-type="OC" data-supplier="volterra" data-priority="high">
           <div class="exc-badge-col">
             <span class="exc-badge badge-high" id="badge3">High</span>
             <span class="exc-type-tag">OC</span>
@@ -919,7 +936,7 @@
         </div>
 
         <!-- Card 4 — Quality hold Precision Metals (High) -->
-        <div class="exc-card high-card" id="exc4">
+        <div class="exc-card high-card" id="exc4" data-type="Quality" data-supplier="precision" data-priority="high">
           <div class="exc-badge-col">
             <span class="exc-badge badge-high" id="badge4">High</span>
             <span class="exc-type-tag">Quality</span>
@@ -951,7 +968,7 @@
         </div>
 
         <!-- Card 5 — Forecast Plant US02 (High, monitoring) -->
-        <div class="exc-card high-card" id="exc5">
+        <div class="exc-card high-card" id="exc5" data-type="Forecast" data-supplier="volterra" data-priority="high">
           <div class="exc-badge-col">
             <span class="exc-badge badge-high" id="badge5">High</span>
             <span class="exc-type-tag">Forecast</span>
@@ -989,7 +1006,7 @@
         </div>
 
         <!-- Card 6 — AUTO-RESOLVED: OC in-tolerance batch, Global Parts -->
-        <div class="exc-card auto-card" id="exc6">
+        <div class="exc-card auto-card" id="exc6" data-type="OC" data-supplier="global" data-priority="resolved">
           <div class="exc-badge-col">
             <span class="exc-badge badge-auto" id="badge6">Auto-resolved</span>
             <span class="exc-type-tag">OC</span>
@@ -1017,7 +1034,7 @@
         </div>
 
         <!-- Card 7 — AUTO-RESOLVED: ASN overdue alert sent, Simco -->
-        <div class="exc-card auto-card" id="exc7">
+        <div class="exc-card auto-card" id="exc7" data-type="ASN" data-supplier="simco" data-priority="resolved">
           <div class="exc-badge-col">
             <span class="exc-badge badge-auto" id="badge7">Auto-resolved</span>
             <span class="exc-type-tag">ASN</span>
@@ -1045,7 +1062,7 @@
         </div>
 
         <!-- Card 8 — AUTO-RESOLVED: Forecast minor gap, Meridian Fasteners -->
-        <div class="exc-card auto-card" id="exc8">
+        <div class="exc-card auto-card" id="exc8" data-type="Forecast" data-supplier="meridian" data-priority="resolved">
           <div class="exc-badge-col">
             <span class="exc-badge badge-auto" id="badge8">Auto-resolved</span>
             <span class="exc-type-tag">Forecast</span>
@@ -1073,7 +1090,7 @@
         </div>
 
         <!-- Card 9 — AUTO-RESOLVED: Duplicate OC deviation, Crestline -->
-        <div class="exc-card auto-card" id="exc9">
+        <div class="exc-card auto-card" id="exc9" data-type="OC" data-supplier="crestline" data-priority="resolved">
           <div class="exc-badge-col">
             <span class="exc-badge badge-auto" id="badge9">Auto-resolved</span>
             <span class="exc-type-tag">OC</span>
@@ -1266,6 +1283,57 @@
 
   function dismissBanner() {
     document.getElementById('agentBanner').classList.add('hidden');
+  }
+
+  function applyFilters() {
+    var typeVal     = document.getElementById('filterType').value;
+    var supplierVal = document.getElementById('filterSupplier').value;
+    var priorityVal = document.getElementById('filterPriority').value;
+
+    var cards = document.querySelectorAll('#excList .exc-card');
+    var shown = 0;
+    var divider = document.getElementById('auto-resolved-divider');
+
+    cards.forEach(function(card) {
+      // Skip the divider (not a card), skip cards already hidden by dismiss/accept animation
+      if (card === divider) return;
+      // Skip dynamically inserted resolved cards (they have -resolved suffix id)
+      if (card.id && card.id.indexOf('-resolved') !== -1) { shown++; return; }
+      // Skip hidden-by-dismiss cards
+      if (card.classList.contains('dismissed')) return;
+      // Skip cards hidden by accept animation (display:none)
+      if (card.style.display === 'none') return;
+
+      var cardType     = card.getAttribute('data-type') || '';
+      var cardSupplier = card.getAttribute('data-supplier') || '';
+      var cardPri      = card.getAttribute('data-priority') || '';
+
+      var typeMatch     = typeVal === 'all'     || cardType === typeVal;
+      var supplierMatch = supplierVal === 'all' || cardSupplier === supplierVal;
+      var priorityMatch = priorityVal === 'all' || cardPri === priorityVal;
+
+      if (typeMatch && supplierMatch && priorityMatch) {
+        card.style.visibility = '';
+        card.style.maxHeight  = '';
+        card.style.overflow   = '';
+        card.style.marginBottom = '';
+        card.style.opacity    = '';
+        shown++;
+      } else {
+        // Collapse filtered-out cards without removing from DOM
+        card.style.visibility  = 'hidden';
+        card.style.maxHeight   = '0';
+        card.style.overflow    = 'hidden';
+        card.style.marginBottom = '0';
+        card.style.opacity     = '0';
+      }
+    });
+
+    // Also count dynamically inserted resolved cards
+    document.querySelectorAll('[id$="-resolved"]').forEach(function(c) { shown++; });
+
+    document.getElementById('filterShowCount').textContent = shown;
+    document.getElementById('inboxCount').textContent = shown;
   }
 </script>
 
