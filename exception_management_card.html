@@ -482,12 +482,12 @@
     .exc-btn-modify:hover { background: #f5f6f7; }
     .exc-btn-dismiss {
       font-size: 12px; font-family: inherit;
-      padding: 0 10px; height: 26px; border-radius: var(--radius-sm);
+      padding: 0 6px; height: 26px; border-radius: var(--radius-sm);
       cursor: pointer; white-space: nowrap;
       display: inline-flex; align-items: center;
-      background: #fff; border: 1px solid var(--border-mid); color: var(--label);
+      background: transparent; border: none; color: var(--label);
     }
-    .exc-btn-dismiss:hover { background: #f5f6f7; }
+    .exc-btn-dismiss:hover { color: var(--title); text-decoration: underline; }
 
     /* ── filter-select ────────────────────────────────────────── */
     .filter-select {
@@ -787,23 +787,23 @@
           <span class="exc-priority-dot urgent"></span>
           <div class="exc-card-body">
             <div class="exc-card-header">
-              <div class="exc-title">Send shortage request to Volterra Components</div>
+              <div class="exc-title">Send shortage request to Volterra Components — Plant US01 at risk</div>
               <span class="exc-badge badge-urgent" id="badge1">Urgent</span>
             </div>
             <div class="exc-problem">
-              Volterra committed only <strong>60% of forecast</strong> for Weeks 4–6 at Plant US01 (Chicago, IL). Supplier previously cited component shortage. This gap is now propagating into OC deviations and ASN shortfalls. Agent has pre-drafted a shortage request referencing full supply context.
+              Volterra Components committed only <strong>60% of forecast</strong> for Weeks 4–6 at Plant US01 (Chicago, IL). Supplier confirmed component shortage on Mar 24. Gap is now propagating into OC deviations and ASN shortfalls across 3 active POs. Agent has pre-drafted a shortage request with full supply context attached.
             </div>
             <div class="exc-facts">
               <div class="exc-fact"><span class="exc-fact-label">Business Impact</span><span class="exc-fact-val">Production shortfall · Plant US01 · Wks 4–6 · 3 POs at risk</span></div>
-              <div class="exc-fact"><span class="exc-fact-label">Root Cause</span><span class="exc-fact-val">Supplier component shortage (confirmed by Volterra)</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Root Cause</span><span class="exc-fact-val">Tier-2 raw material shortage (confirmed by Volterra, Mar 24)</span></div>
               <div class="exc-fact"><span class="exc-fact-label">Cost Impacted</span><span class="exc-fact-val cost">$1,255,930</span></div>
             </div>
             <div class="exc-erosion-trail">
-              <div class="erosion-step"><div class="erosion-label">Forecast</div><div class="erosion-val">100%</div><div class="erosion-sub">Demand published</div></div>
+              <div class="erosion-step"><div class="erosion-label">Forecast</div><div class="erosion-val">100%</div><div class="erosion-sub">680 units/wk</div></div>
               <div class="erosion-arrow">→</div>
-              <div class="erosion-step"><div class="erosion-label">OC Confirmed</div><div class="erosion-val critical">60%</div><div class="erosion-sub">Capacity constraint</div></div>
+              <div class="erosion-step"><div class="erosion-label">OC Confirmed</div><div class="erosion-val critical">60%</div><div class="erosion-sub">408 units/wk</div></div>
               <div class="erosion-arrow">→</div>
-              <div class="erosion-step"><div class="erosion-label">ASN Shipped</div><div class="erosion-val critical">45%</div><div class="erosion-sub">Physical delivery</div></div>
+              <div class="erosion-step"><div class="erosion-label">ASN Shipped</div><div class="erosion-val critical">45%</div><div class="erosion-sub">306 units/wk</div></div>
             </div>
             <div class="exc-meta-row">
               <span class="exc-meta-pill">Forecast</span>
@@ -818,22 +818,57 @@
           <div class="exc-card-actions">
             <button class="exc-btn-cta" id="cta1" onclick="acceptCard('exc1')">Accept &amp; Send</button>
             <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify →</a>
+              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
               <button class="exc-btn-dismiss" onclick="dismissCard('exc1')">Dismiss</button>
             </div>
           </div>
         </div>
 
-        <!-- Card 2 — OC Deviations batch (High) -->
+        <!-- Card 2 — Hard ship date breach (Urgent) -->
         <div class="exc-card" id="exc2">
+          <span class="exc-priority-dot urgent"></span>
+          <div class="exc-card-body">
+            <div class="exc-card-header">
+              <div class="exc-title">Apex Precision missed hard ship date — expedite or source alternate</div>
+              <span class="exc-badge badge-urgent" id="badge2">Urgent</span>
+            </div>
+            <div class="exc-problem">
+              Apex Precision (Vendor #5014) failed to ship PO-4500002201 by the hard ship date of <strong>Mar 24, 2026</strong>. No ASN received. 520 units of PN AP-7732-X needed at Plant US03 (Austin, TX) by Apr 1 to avoid line stoppage. Agent has identified one alternate source (Meridian Fasteners) with 14-day lead time and pre-drafted an expedite request to Apex.
+            </div>
+            <div class="exc-facts">
+              <div class="exc-fact"><span class="exc-fact-label">Business Impact</span><span class="exc-fact-val">Line stoppage risk · Plant US03 · Assembly Line 4 · Apr 1 deadline</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Root Cause</span><span class="exc-fact-val">No ASN posted · last communication Mar 19 (no response since)</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Cost Impacted</span><span class="exc-fact-val cost">$843,200</span></div>
+            </div>
+            <div class="exc-meta-row">
+              <span class="exc-meta-pill">ASN</span>
+              <span class="exc-meta-pill">Apex Precision</span>
+              <span class="exc-meta-pill">Plant US03</span>
+              <span class="exc-meta-sep">·</span>
+              <span class="exc-meta-date">Mar 25, 2026</span>
+              <span class="exc-meta-sep">·</span>
+              <span class="exc-meta-conf">Confidence 99%</span>
+            </div>
+          </div>
+          <div class="exc-card-actions">
+            <button class="exc-btn-cta" id="cta2" onclick="acceptCard('exc2')">Send Expedite Request</button>
+            <div class="exc-card-sec-actions">
+              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
+              <button class="exc-btn-dismiss" onclick="dismissCard('exc2')">Dismiss</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 — OC Deviations batch (High) -->
+        <div class="exc-card" id="exc3">
           <span class="exc-priority-dot high"></span>
           <div class="exc-card-body">
             <div class="exc-card-header">
-              <div class="exc-title">Batch-approve 14 OC deviations · escalate 3 flagged</div>
-              <span class="exc-badge badge-high" id="badge2">High</span>
+              <div class="exc-title">Batch-approve 14 in-tolerance OC deviations · escalate 3 flagged</div>
+              <span class="exc-badge badge-high" id="badge3">High</span>
             </div>
             <div class="exc-problem">
-              17 open OC deviations from Volterra Components at Plant US01. <strong>14 are within ±5% tolerance</strong> — ready for batch approval. 3 flagged for manual review: PO-4500001010 (–15%), PO-4500001011 (–20%), PO-4500001012 (+10%). Oldest is 14 days pending.
+              17 open OC deviations from Volterra Components at Plant US01. <strong>14 are within ±5% tolerance</strong> and ready for batch approval. 3 require manual review: PO-4500001010 (–15%, 75 units short), PO-4500001011 (–20%, 60 units short), PO-4500001012 (+10%, 20 units over). Oldest deviation is 14 days pending.
             </div>
             <div class="exc-table-wrap">
               <table class="exc-table">
@@ -842,7 +877,7 @@
                   <tr><td>4500001010</td><td>500</td><td>425</td><td class="cell-warn">–15%</td><td><span class="badge-pill pill-flag">Flagged</span></td></tr>
                   <tr><td>4500001011</td><td>300</td><td>240</td><td class="cell-warn">–20%</td><td><span class="badge-pill pill-flag">Flagged</span></td></tr>
                   <tr><td>4500001012</td><td>200</td><td>220</td><td class="cell-ok">+10%</td><td><span class="badge-pill pill-flag">Flagged</span></td></tr>
-                  <tr><td colspan="4" style="color:#556b82;font-size:12px;padding-top:6px;">+ 14 in-tolerance deviations (batch-approvable)</td><td><span class="badge-pill pill-ok">In Tolerance</span></td></tr>
+                  <tr><td colspan="4" style="color:#556b82;font-size:12px;padding-top:6px;">+ 14 in-tolerance deviations ready for batch approval</td><td><span class="badge-pill pill-ok">In Tolerance</span></td></tr>
                 </tbody>
               </table>
             </div>
@@ -856,50 +891,9 @@
             </div>
           </div>
           <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta2" onclick="acceptCard('exc2')">Batch Approve 14</button>
+            <button class="exc-btn-cta" id="cta3" onclick="acceptCard('exc3')">Batch Approve 14</button>
             <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify →</a>
-              <button class="exc-btn-dismiss" onclick="dismissCard('exc2')">Dismiss</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3 — ASN partial shipment (Urgent) -->
-        <div class="exc-card" id="exc3">
-          <span class="exc-priority-dot urgent"></span>
-          <div class="exc-card-body">
-            <div class="exc-card-header">
-              <div class="exc-title">Follow up on partial ASN shipment — 55% not yet shipped</div>
-              <span class="exc-badge badge-urgent" id="badge3">Urgent</span>
-            </div>
-            <div class="exc-problem">
-              Volterra shipped only <strong>45% of committed quantity</strong> across 3 ASNs for POs 4500001010–1012. This completes the full supply erosion trail: Forecast 100% → OC 60% → ASN 45%. Agent has pre-populated a follow-up message with the full context — requesting ETA for remaining 55%.
-            </div>
-            <div class="exc-facts">
-              <div class="exc-fact"><span class="exc-fact-label">Shipment Gap</span><span class="exc-fact-val">55% of committed qty not yet shipped</span></div>
-              <div class="exc-fact"><span class="exc-fact-label">Affected POs</span><span class="exc-fact-val">PO-4500001010 · PO-4500001011 · PO-4500001012</span></div>
-              <div class="exc-fact"><span class="exc-fact-label">Cost Impacted</span><span class="exc-fact-val cost">$689,761</span></div>
-            </div>
-            <div class="exc-erosion-trail">
-              <div class="erosion-step"><div class="erosion-label">Forecast</div><div class="erosion-val">100%</div><div class="erosion-sub">Demand published</div></div>
-              <div class="erosion-arrow">→</div>
-              <div class="erosion-step"><div class="erosion-label">OC Confirmed</div><div class="erosion-val critical">60%</div><div class="erosion-sub">Capacity constraint</div></div>
-              <div class="erosion-arrow">→</div>
-              <div class="erosion-step"><div class="erosion-label">ASN Shipped</div><div class="erosion-val critical">45%</div><div class="erosion-sub">Physical delivery</div></div>
-            </div>
-            <div class="exc-meta-row">
-              <span class="exc-meta-pill">ASN</span>
-              <span class="exc-meta-pill">Volterra Components</span>
-              <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-date">Mar 25, 2026</span>
-              <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-conf">Confidence 98%</span>
-            </div>
-          </div>
-          <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta3" onclick="acceptCard('exc3')">Send Follow-up</button>
-            <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify →</a>
+              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
               <button class="exc-btn-dismiss" onclick="dismissCard('exc3')">Dismiss</button>
             </div>
           </div>
@@ -910,16 +904,16 @@
           <span class="exc-priority-dot high"></span>
           <div class="exc-card-body">
             <div class="exc-card-header">
-              <div class="exc-title">Acknowledge forecast at Plant US02 — monitoring only</div>
+              <div class="exc-title">Monitor Plant US02 forecast — 80% commit, potential inter-plant offset</div>
               <span class="exc-badge badge-high" id="badge4">High</span>
             </div>
             <div class="exc-problem">
-              Plant US02 (Volterra Components) showing <strong>80% commit for Weeks 4–6</strong> — above the 75% alert threshold. No OC deviations detected, ASN tracking on schedule. No immediate action required; agent recommends monitoring through Week 6. If Plant US01 shortfall persists, US02 may partially offset via inter-plant transfer.
+              Plant US02 (Detroit, MI) showing <strong>80% commit rate for Weeks 4–6</strong>, above the 75% alert threshold. No OC deviations detected; ASN 800045340 tracking on schedule. If Plant US01 shortfall persists, US02 can partially offset via inter-plant transfer — agent estimates up to 120 units/week available.
             </div>
             <div class="exc-facts">
-              <div class="exc-fact"><span class="exc-fact-label">Commit Level</span><span class="exc-fact-val">80% · above 75% alert threshold</span></div>
-              <div class="exc-fact"><span class="exc-fact-label">OC Status</span><span class="exc-fact-val">No deviations · all POs confirmed in tolerance</span></div>
-              <div class="exc-fact"><span class="exc-fact-label">ASN Status</span><span class="exc-fact-val ok">On track · next shipment ETA Mar 28</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Commit Rate</span><span class="exc-fact-val">80% · 544 of 680 units confirmed · above 75% threshold</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Inter-plant Offset</span><span class="exc-fact-val">Up to 120 units/wk available from US02 if needed</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">ASN Status</span><span class="exc-fact-val ok">On track · ASN 800045340 · ETA Mar 30, 2026</span></div>
             </div>
             <div class="exc-meta-row">
               <span class="exc-meta-pill">Forecast</span>
@@ -934,7 +928,7 @@
           <div class="exc-card-actions">
             <button class="exc-btn-cta" id="cta4" onclick="acceptCard('exc4')">Acknowledge</button>
             <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify →</a>
+              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
               <button class="exc-btn-dismiss" onclick="dismissCard('exc4')">Dismiss</button>
             </div>
           </div>
@@ -945,30 +939,30 @@
           <span class="exc-priority-dot info"></span>
           <div class="exc-card-body">
             <div class="exc-card-header">
-              <div class="exc-title">Batch-approve 6 aged OC deviations · enable auto-approval rule</div>
+              <div class="exc-title">Approve 6 aged OC deviations from Global Parts — all within tolerance</div>
               <span class="exc-badge badge-info" id="badge5">Info</span>
             </div>
             <div class="exc-problem">
-              6 OC deviations from Global Parts Ltd have exceeded the <strong>10-day approval SLA</strong>. All 6 are within ±5% tolerance. This is the 3rd consecutive cycle with aging approvals for this supplier. Agent recommends enabling an auto-approval rule to prevent recurrence.
+              6 OC deviations from Global Parts Ltd (PO-4500002003–2008) have exceeded the <strong>10-day approval SLA</strong>. All 6 are within ±4% tolerance. This is the 3rd consecutive cycle with aging approvals from this supplier. Agent recommends enabling an auto-approval rule for deviations under ±5% to prevent recurrence.
             </div>
             <div class="exc-facts">
-              <div class="exc-fact"><span class="exc-fact-label">Oldest Deviation</span><span class="exc-fact-val cost">14 days pending · PO-4500002007</span></div>
-              <div class="exc-fact"><span class="exc-fact-label">Pattern</span><span class="exc-fact-val">3rd consecutive cycle with aging approvals</span></div>
-              <div class="exc-fact"><span class="exc-fact-label">Auto-rule Savings</span><span class="exc-fact-val ok">~25 min/cycle · applies to 80% of this supplier's deviations</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Oldest Pending</span><span class="exc-fact-val cost">14 days · PO-4500002003 · deviation –3.8%</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Pattern Detected</span><span class="exc-fact-val">3rd consecutive cycle with SLA breaches for this supplier</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Auto-rule Savings</span><span class="exc-fact-val ok">~25 min/cycle · covers ~80% of Global Parts deviations</span></div>
             </div>
             <div class="exc-meta-row">
               <span class="exc-meta-pill">Order Confirmation</span>
               <span class="exc-meta-pill">Global Parts Ltd</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-date">Mar 20, 2026</span>
+              <span class="exc-meta-date">Mar 13, 2026</span>
               <span class="exc-meta-sep">·</span>
               <span class="exc-meta-conf">Confidence 88%</span>
             </div>
           </div>
           <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta5" onclick="acceptCard('exc5')">Batch Approve All 6</button>
+            <button class="exc-btn-cta" id="cta5" onclick="acceptCard('exc5')">Approve All 6</button>
             <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify →</a>
+              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
               <button class="exc-btn-dismiss" onclick="dismissCard('exc5')">Dismiss</button>
             </div>
           </div>
@@ -979,22 +973,22 @@
           <span class="exc-priority-dot info"></span>
           <div class="exc-card-body">
             <div class="exc-card-header">
-              <div class="exc-title">Acknowledge missing ASNs from Simco — proactive alert sent</div>
+              <div class="exc-title">2 ASNs from Simco Electronics overdue — proactive alert already sent</div>
               <span class="exc-badge badge-info" id="badge6">Info</span>
             </div>
             <div class="exc-problem">
-              2 ASNs from Simco Electronics (PO-4500003021 and PO-4500003022) are due by <strong>Mar 27</strong> and have not been submitted. Risk is low — Simco has a 92% on-time rate and no linked OC deviations. Agent has already sent a proactive push notification to the supplier.
+              ASNs for PO-4500003021 (250 units) and PO-4500003022 (180 units) were due <strong>Mar 26</strong> and have not been submitted. Risk is low — Simco has a 92% on-time ASN rate and no linked OC deviations. Agent has already sent a proactive notification to supplier contact J. Reyes at 08:14 today.
             </div>
             <div class="exc-facts">
-              <div class="exc-fact"><span class="exc-fact-label">Affected POs</span><span class="exc-fact-val">PO-4500003021 · PO-4500003022</span></div>
-              <div class="exc-fact"><span class="exc-fact-label">Due Date</span><span class="exc-fact-val">Mar 27, 2026 · 2 days remaining</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Affected POs</span><span class="exc-fact-val">PO-4500003021 (250 units) · PO-4500003022 (180 units)</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Due Date</span><span class="exc-fact-val cost">Mar 26, 2026 · 1 day overdue</span></div>
               <div class="exc-fact"><span class="exc-fact-label">Risk Level</span><span class="exc-fact-val ok">Low · supplier on-time rate 92% · no linked OC deviations</span></div>
             </div>
             <div class="exc-meta-row">
               <span class="exc-meta-pill">ASN</span>
               <span class="exc-meta-pill">Simco Electronics</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-date">Mar 25, 2026</span>
+              <span class="exc-meta-date">Mar 27, 2026</span>
               <span class="exc-meta-sep">·</span>
               <span class="exc-meta-conf">Confidence 85%</span>
             </div>
@@ -1002,7 +996,7 @@
           <div class="exc-card-actions">
             <button class="exc-btn-cta" id="cta6" onclick="acceptCard('exc6')">Acknowledge</button>
             <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify →</a>
+              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
               <button class="exc-btn-dismiss" onclick="dismissCard('exc6')">Dismiss</button>
             </div>
           </div>
