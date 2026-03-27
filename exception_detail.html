@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exception Details — SAP Business Network</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:       #0070f2;
+      --white:       #ffffff;
+      --page-bg:     #f5f6f7;
+      --title:       #1d2d3e;
+      --label:       #556b82;
+      --border:      #e5e5e5;
+      --border-mid:  #d9d9d9;
+      --urgent:      #bb0000;
+      --positive:    #256f3a;
+      --ai-blue:     #0057b8;
+      --info:        #0064d9;
+      --radius-sm:   4px;
+      --radius:      8px;
+    }
+
+    body {
+      font-family: "72","72full",Arial,Helvetica,sans-serif;
+      font-size: 14px;
+      background: var(--page-bg);
+      color: var(--title);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Shell Bar ─────────────────────────────────────────── */
+    .bn-shell {
+      display: flex; align-items: center;
+      background: #fff;
+      padding: 8px 48px 8px 14px;
+      gap: 120px; flex-shrink: 0;
+      box-shadow: 0 0 2px rgba(34,54,73,.2), 0 2px 4px rgba(34,54,73,.2);
+      z-index: 100; position: relative;
+    }
+    .bn-shell-left { display: flex; align-items: center; gap: 16px; height: 52px; flex-shrink: 0; }
+    .bn-shell-logo-wrap { display: flex; align-items: center; flex-shrink: 0; }
+    .bn-shell-menu-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; border: none;
+      background: transparent; cursor: pointer; flex-shrink: 0;
+    }
+    .bn-shell-menu-btn:hover { background: rgba(0,0,0,.06); }
+    .bn-shell-brand-btn {
+      display: flex; align-items: center; gap: 6px;
+      min-height: 36px; padding: 10px; border-radius: 8px;
+      border: 1px solid transparent; background: transparent; cursor: pointer;
+    }
+    .bn-shell-brand-btn:hover { background: rgba(0,0,0,.05); }
+    .bn-shell-brand-text { font-size: 16px; font-weight: 700; color: #002a86; }
+    .bn-test-tag {
+      background: #f8d6ff; border: 1px solid #f8d6ff; color: #a100c2;
+      font-size: 12px; font-weight: 700; border-radius: 8px; padding: 3px 8px;
+    }
+    .bn-shell-center {
+      position: absolute; left: 0; right: 0;
+      display: flex; justify-content: center; pointer-events: none;
+    }
+    .bn-search-wrap {
+      width: 400px; display: flex; align-items: center;
+      background: #eff1f2; border-radius: 18px;
+      box-shadow: inset 0 0 0 1px rgba(85,107,129,.25);
+      padding: 4px 4px 4px 0; height: 36px; pointer-events: all;
+    }
+    .bn-search-menu-btn { display: flex; align-items: center; padding-right: 5px; width: 100px; }
+    .bn-search-select-inner {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px; border-radius: 8px; cursor: pointer;
+    }
+    .bn-search-select-text { font-size: 14px; color: #556b82; }
+    .bn-search-sep { width: 1px; height: 24px; background: #556b81; border-radius: 12px; }
+    .bn-search-input {
+      flex: 1; border: none; background: transparent; outline: none;
+      font-size: 14px; font-style: italic; color: #556b82; padding: 0 8px;
+    }
+    .bn-search-btn {
+      background: transparent; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px;
+    }
+    .bn-shell-right {
+      display: flex; align-items: center; gap: 16px; margin-left: auto;
+    }
+    .bn-shell-enterprise { font-size: 14px; color: #556b82; }
+    .bn-shell-divider { width: 1px; height: 24px; background: #d9d9d9; }
+    .bn-shell-actions { display: flex; align-items: center; gap: 8px; }
+    .bn-icon-btn {
+      background: transparent; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px; border-radius: 8px;
+    }
+    .bn-icon-btn:hover { background: rgba(0,0,0,.06); }
+    .bn-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #e76500; color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative;
+    }
+    .bn-avatar-dot {
+      position: absolute; bottom: 0; right: 0;
+      width: 10px; height: 10px; background: #6bb700; border-radius: 50%;
+      border: 2px solid #fff;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    .app-body { display: flex; flex: 1; min-height: 0; }
+
+    /* ── Side Nav ───────────────────────────────────────────── */
+    .bn-sidenav {
+      width: 62px; min-width: 62px; background: #fff;
+      display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: 0 0 2px rgba(34,53,72,.2), 0 2px 4px rgba(34,53,72,.2);
+      z-index: 5; flex-shrink: 0; height: 100%;
+    }
+    .bn-sidenav-content {
+      flex: 1; display: flex; flex-direction: column; gap: 4px;
+      padding: 8px 8px 0 8px;
+    }
+    .bn-nav-item {
+      display: flex; align-items: center;
+      width: 48px; height: 32px;
+      padding-left: 2px; padding-right: 14px;
+      border-radius: 8px; border: none; background: #fff;
+      cursor: pointer; position: relative; overflow: hidden;
+    }
+    .bn-nav-item:hover { background: #f5f5f5; }
+    .bn-nav-item.active { background: #ebf8ff; }
+    .bn-nav-item.active .bn-nav-indicator { display: block; }
+    .bn-nav-indicator {
+      display: none; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: #0064d9;
+    }
+    .bn-nav-icon-wrap {
+      display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 100%; padding: 8px 14px; margin-right: -12px;
+    }
+    .bn-nav-item.active .bn-nav-icon-wrap { margin-right: -3px; }
+    .bn-sidenav-footer {
+      display: flex; flex-direction: column; gap: 4px; align-items: center;
+      padding: 4px 0 8px 0; width: 62px;
+    }
+    .bn-sidenav-sep { height: 1px; background: #d9d9d9; width: 46px; margin: 0 8px; }
+    .bn-footer-write {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid #bcc3ca; background: #fff; cursor: pointer;
+    }
+    .bn-footer-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px;
+      border: none; background: #fff; cursor: pointer;
+    }
+
+    /* ── Right icon strip (like image) ────────────────────── */
+    .right-icon-strip {
+      position: fixed; right: 0; top: 52px;
+      width: 44px;
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 8px 6px;
+      background: #fff;
+      border-left: 1px solid var(--border);
+      height: calc(100vh - 52px);
+      z-index: 10;
+    }
+    .right-icon-btn {
+      width: 32px; height: 32px; border-radius: 6px;
+      border: none; background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--label);
+    }
+    .right-icon-btn:hover { background: #f5f6f7; }
+
+    /* ── Main Content ────────────────────────────────────────── */
+    .main {
+      flex: 1; display: flex; flex-direction: column;
+      min-height: 0; min-width: 0; overflow: hidden;
+      margin-right: 44px;
+    }
+
+    /* ── Object Page Header ──────────────────────────────────── */
+    .obj-header {
+      background: #fff;
+      border-bottom: 1px solid var(--border-mid);
+      flex-shrink: 0;
+      padding: 0;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 24px 0;
+      font-size: 13px; color: var(--info);
+    }
+    .breadcrumb a { color: var(--info); text-decoration: none; cursor: pointer; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb-sep { color: var(--label); }
+
+    /* Title row */
+    .obj-title-row {
+      padding: 6px 24px 2px;
+    }
+    .obj-title {
+      font-family: "72Black","72Blackfull","72","72full",Arial,sans-serif;
+      font-size: 1.375rem; color: #131e29; line-height: 1.25;
+    }
+    .obj-subtitle {
+      font-size: 13px; color: var(--label); margin-top: 2px;
+    }
+
+    /* AI Recommendation card */
+    .ai-rec-card {
+      margin: 12px 24px 0;
+      background: #fff;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex; gap: 24px; align-items: flex-start;
+    }
+    .ai-rec-card-left { flex: 1; min-width: 0; }
+    .ai-rec-card-right {
+      min-width: 260px; max-width: 320px;
+      font-size: 13px; color: var(--title); line-height: 1.5;
+      border-left: 1px solid var(--border); padding-left: 20px;
+    }
+    .ai-rec-title-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 14px; font-weight: 700; color: var(--title);
+      margin-bottom: 6px;
+    }
+    .ai-rec-body { font-size: 13px; color: var(--title); line-height: 1.55; }
+    .ai-rec-links { margin-top: 8px; display: flex; flex-direction: column; gap: 3px; }
+    .ai-rec-link { color: var(--info); font-size: 13px; cursor: pointer; text-decoration: none; }
+    .ai-rec-link:hover { text-decoration: underline; }
+    .ai-rec-actions {
+      display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end;
+    }
+    .btn-accept {
+      font-size: 13px; font-family: inherit; padding: 0 20px; height: 30px;
+      border-radius: var(--radius-sm); border: 1px solid var(--brand);
+      background: var(--brand); color: #fff; cursor: pointer;
+    }
+    .btn-accept:hover { background: #0057c2; border-color: #0057c2; }
+    .btn-dismiss {
+      font-size: 13px; font-family: inherit; padding: 0 16px; height: 30px;
+      border-radius: var(--radius-sm); border: 1px solid var(--border-mid);
+      background: #fff; color: var(--title); cursor: pointer;
+    }
+    .btn-dismiss:hover { background: #f5f6f7; }
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex; align-items: flex-end; gap: 0;
+      padding: 10px 24px 0;
+      margin-top: 10px;
+      overflow-x: auto;
+    }
+    .tab-item {
+      display: flex; flex-direction: column;
+      padding: 0 16px 8px; cursor: pointer;
+      font-size: 14px; font-weight: 400; color: var(--label);
+      border: none; background: none;
+      white-space: nowrap; flex-shrink: 0;
+      border-bottom: 3px solid transparent;
+    }
+    .tab-item:hover { color: var(--title); }
+    .tab-item.active { color: var(--brand); font-weight: 700; border-bottom-color: var(--brand); }
+
+    /* ── Object Page Content ─────────────────────────────────── */
+    .obj-content {
+      flex: 1; overflow-y: auto; padding: 16px 24px 24px;
+    }
+
+    /* ── Table card ───────────────────────────────────────────── */
+    .tbl-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .tbl-toolbar {
+      display: flex; align-items: center; justify-content: flex-end;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    .tbl-icon-btn {
+      width: 30px; height: 30px; border-radius: 6px;
+      border: 1px solid var(--border-mid); background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--label);
+    }
+    .tbl-icon-btn:hover { background: #f5f6f7; }
+
+    /* Main data table */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th {
+      text-align: left; padding: 8px 12px;
+      font-size: 12px; font-weight: 700; color: var(--label);
+      border-bottom: 1px solid var(--border);
+      background: #fff; white-space: nowrap;
+    }
+    .data-table th.num { text-align: right; }
+    .data-table td {
+      padding: 9px 12px; border-bottom: 1px solid var(--border);
+      color: var(--title); vertical-align: middle; white-space: nowrap;
+    }
+    .data-table td.num { text-align: right; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f9fafb; }
+
+    .val-blue  { color: var(--info); font-weight: 500; }
+    .val-red   { color: var(--urgent); font-weight: 700; }
+    .tbl-link  { color: var(--info); text-decoration: underline; cursor: pointer; }
+
+    /* checkbox col */
+    .cb-col { width: 32px; }
+    input[type="checkbox"] { cursor: pointer; accent-color: var(--info); }
+
+    /* delete icon col */
+    .del-btn {
+      background: none; border: none; cursor: pointer; padding: 4px;
+      color: var(--label); opacity: 0.6;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .del-btn:hover { opacity: 1; color: var(--urgent); }
+  </style>
+</head>
+<body>
+
+<!-- ── Shell Bar ──────────────────────────────────────── -->
+<div class="bn-shell">
+  <div class="bn-shell-left">
+    <div class="bn-shell-logo-wrap">
+      <button class="bn-shell-menu-btn" title="Menu">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15.25 12.5C15.664 12.5003 16 12.8359 16 13.25C16 13.6641 15.664 13.9997 15.25 14H0.75C0.335786 14 0 13.6642 0 13.25C0 12.8358 0.335786 12.5 0.75 12.5H15.25ZM15.25 7C15.664 7.00026 16 7.33595 16 7.75C16 8.16405 15.664 8.49974 15.25 8.5H0.75C0.335786 8.5 0 8.16421 0 7.75C0 7.33579 0.335786 7 0.75 7H15.25ZM15.25 2C15.664 2.00026 16 2.33595 16 2.75C16 3.16405 15.664 3.49974 15.25 3.5H0.75C0.335786 3.5 0 3.16421 0 2.75C0 2.33579 0.335786 2 0.75 2H15.25Z" fill="#131E29"/></svg>
+      </button>
+      <svg width="60" height="29" viewBox="0 0 60 29" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin-left:2px;" aria-label="SAP">
+        <g clip-path="url(#sap-clip2)">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M0 29.3478H29.983L59.3257 0H0V29.3478Z" fill="url(#sap-grad2)"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M35.2068 5.86961H29.3477L29.3673 19.65L24.2653 5.86504H19.2064L14.8512 17.3779C14.3881 14.4483 11.3594 13.4374 8.97639 12.6803C7.40269 12.1748 5.73247 11.4313 5.74943 10.6096C5.76247 9.93526 6.64291 9.30983 8.39269 9.40309C9.5666 9.46635 10.6036 9.56091 12.6664 10.5574L14.6946 7.02265C12.8138 6.06526 10.2129 5.4607 8.0803 5.45874H8.06726C5.58052 5.45874 3.50986 6.26418 2.22639 7.59135C1.3316 8.51744 0.848995 9.69526 0.829429 10.9977C0.796821 12.7898 1.45356 14.0603 2.83356 15.0757C3.99965 15.93 5.49117 16.4844 6.8053 16.8913C8.42595 17.3935 9.74986 17.8305 9.73356 18.7605C9.72052 19.0996 9.59269 19.4166 9.34878 19.6722C8.94443 20.0896 8.32486 20.2461 7.46726 20.2631C5.81269 20.2983 4.5866 20.0381 2.63269 18.8831L0.828125 22.4635C2.78008 23.5735 4.85204 24.1305 7.20639 24.1305L7.73595 24.1266C9.78508 24.0894 11.4481 23.5983 12.7694 22.5353C12.8451 22.4746 12.9129 22.4133 12.9833 22.3513L12.7616 23.494L17.7051 23.4783L18.592 21.2074C19.5246 21.5257 20.5851 21.7018 21.7107 21.7018C22.8077 21.7018 23.8394 21.5348 24.7544 21.2348L25.3727 23.4783L34.2423 23.4868L34.2638 18.3098H36.1512C40.7131 18.3098 43.4099 15.9881 43.4099 12.0946C43.4086 7.75831 40.7868 5.86961 35.2068 5.86961ZM21.7107 17.6492C21.0292 17.6492 20.3901 17.5305 19.8403 17.3218L21.6899 11.4816H21.7257L23.5453 17.3381C22.9975 17.5337 22.3733 17.6492 21.7101 17.6492H21.7107ZM35.5499 14.2937H34.2625V9.587H35.5505C37.2657 9.587 38.6353 10.1583 38.6353 11.91C38.634 13.7231 37.2657 14.2937 35.5505 14.2937" fill="white"/>
+        </g>
+        <defs>
+          <linearGradient id="sap-grad2" x1="29.6628" y1="0" x2="29.6628" y2="29.3485" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#00AEEF"/><stop offset="0.212" stop-color="#0097DC"/>
+            <stop offset="0.519" stop-color="#007CC5"/><stop offset="0.792" stop-color="#006CB8"/>
+            <stop offset="1" stop-color="#0066B3"/>
+          </linearGradient>
+          <clipPath id="sap-clip2"><rect width="60" height="29" fill="white"/></clipPath>
+        </defs>
+      </svg>
+      <button class="bn-shell-brand-btn">
+        <span class="bn-shell-brand-text">Business Network</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12.8292 6.27342C13.0923 6.59309 13.0462 7.06578 12.7267 7.32909L8.4796 10.8291C8.20272 11.0572 7.8025 11.0571 7.5255 10.8291L3.27355 7.32909C2.95375 7.06587 2.90782 6.59324 3.17101 6.27342C3.43423 5.95363 3.90686 5.9077 4.22667 6.17088L8.00206 9.27831L11.7735 6.17088C12.0932 5.90781 12.5659 5.95387 12.8292 6.27342Z" fill="#131E29"/></svg>
+      </button>
+    </div>
+    <span class="bn-test-tag">Test Mode</span>
+  </div>
+  <div class="bn-shell-center">
+    <div class="bn-search-wrap">
+      <div class="bn-search-menu-btn">
+        <div class="bn-search-select-inner">
+          <span class="bn-search-select-text">Select</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12.8292 6.27342C13.0923 6.59309 13.0462 7.06578 12.7267 7.32909L8.4796 10.8291C8.20272 11.0572 7.8025 11.0571 7.5255 10.8291L3.27355 7.32909C2.95375 7.06587 2.90782 6.59324 3.17101 6.27342C3.43423 5.95363 3.90686 5.9077 4.22667 6.17088L8.00206 9.27831L11.7735 6.17088C12.0932 5.90781 12.5659 5.95387 12.8292 6.27342Z" fill="#131E29"/></svg>
+        </div>
+      </div>
+      <div class="bn-search-sep"></div>
+      <input class="bn-search-input" placeholder="Search" />
+      <button class="bn-search-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M7 1C10.3137 1 13 3.68629 13 7C13 8.38646 12.528 9.66175 11.7383 10.6777L14.7803 13.7197C15.0732 14.0126 15.0732 14.4874 14.7803 14.7803C14.4874 15.0732 14.0126 15.0732 13.7197 14.7803L10.6777 11.7383C9.66175 12.528 8.38646 13 7 13C3.68629 13 1 10.3137 1 7C1 3.68629 3.68629 1 7 1ZM7 2.5C4.51472 2.5 2.5 4.51472 2.5 7C2.5 9.48528 4.51472 11.5 7 11.5C9.48528 11.5 11.5 9.48528 11.5 7C11.5 4.51472 9.48528 2.5 7 2.5Z" fill="#131E29"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="bn-shell-right">
+    <span class="bn-shell-enterprise">Enterprise</span>
+    <div class="bn-shell-divider"></div>
+    <div class="bn-shell-actions">
+      <button class="bn-icon-btn" title="Joule">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#da-c2)"><path d="M12 0C12.2475 2.04033e-05 12.4794 0.121993 12.6192 0.326274L15.8692 5.07776C16.05 5.34206 16.0426 5.69214 15.8516 5.94913L8.60158 15.7022C8.30639 16.0993 7.69364 16.0993 7.39844 15.7022L0.148377 5.94913C-0.0426493 5.69213 -0.0499916 5.34207 0.130799 5.07776L3.43747 0.253986C3.57884 0.0936257 3.78332 0 3.99997 0H12ZM1.67085 5.48414L8.00001 13.9976L14.3282 5.48414L11.6045 1.50047H4.39548L1.67085 5.48414ZM9.16994 3.23441C9.27994 2.92338 9.7201 2.92338 9.83011 3.23441C10.2001 4.31779 10.68 4.8094 11.7598 5.17057C12.0798 5.28093 12.0798 5.73255 11.7598 5.83288C10.68 6.20408 10.1901 6.68566 9.83011 7.76904C9.7201 8.08007 9.27994 8.08007 9.16994 7.76904C8.79998 6.68567 8.31999 6.19405 7.24024 5.83288C6.92024 5.72252 6.92024 5.2709 7.24024 5.17057C8.31999 4.79937 8.80998 4.31778 9.16994 3.23441Z" fill="#131E29"/></g><defs><clipPath id="da-c2"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
+      </button>
+      <button class="bn-icon-btn" title="Notifications">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M7.99993 1C10.2093 1 11.6281 1.95567 12.4515 3.31543C13.2398 4.61717 13.4415 6.21709 13.4415 7.50488V8.14062C13.4415 9.2129 13.7823 10.1174 14.1324 10.7617C14.3206 11.1078 14.5411 11.4387 14.8009 11.7354C15.2431 12.204 14.8992 13 14.2546 13H10.4178C10.1367 14.15 9.16176 15 7.99993 15C6.83815 14.9999 5.86314 14.1499 5.5821 13H1.74524C1.09932 12.9998 0.756212 12.2016 1.20089 11.7334C1.23 11.7017 1.55014 11.3454 1.8674 10.7617C2.21754 10.1174 2.55835 9.21295 2.55835 8.14062V7.50488C2.55835 6.21712 2.76013 4.61716 3.54835 3.31543C4.37175 1.95566 5.79064 1.00006 7.99993 1ZM7.99993 2.5C6.30536 2.50006 5.37854 3.19013 4.83251 4.0918C4.25135 5.05158 4.05947 6.32926 4.05947 7.50488V8.14062C4.05947 9.54499 3.6099 10.7045 3.17405 11.5H12.8258C12.3897 10.7046 11.9404 9.54493 11.9404 8.14062V7.50488C11.9404 6.32922 11.7485 5.05159 11.1673 4.0918C10.6213 3.19014 9.69456 2.5 7.99993 2.5Z" fill="#131E29"/></svg>
+      </button>
+      <button class="bn-icon-btn" title="Help">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#h-c2)"><path d="M8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0ZM8 1.5C4.41015 1.5 1.5 4.41015 1.5 8C1.5 11.5899 4.41015 14.5 8 14.5C11.5899 14.5 14.5 11.5899 14.5 8C14.5 4.41015 11.5899 1.5 8 1.5ZM8 11C8.55229 11 9 11.4477 9 12C9 12.5523 8.55229 13 8 13C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11ZM8 3C9.65902 3 11 4.33149 11 5.99121C10.9998 7.39121 10.0445 8.55335 8.75 8.88379V9.25C8.74998 9.6642 8.4142 10 8 10C7.5858 10 7.25002 9.6642 7.25 9.25V8.23145C7.25 7.68359 7.65701 7.51544 8.1543 7.47363C8.65158 7.43183 9.5 6.9344 9.5 5.99121C9.5 5.16574 8.83643 4.5 8 4.5C7.11719 4.5 6.58594 5.08203 6.49609 6.06738C6.45771 6.44565 6.13834 6.74121 5.75 6.74121C5.33594 6.74121 5.00025 6.40521 5 5.99121C5 4.33149 6.34098 3 8 3Z" fill="#131E29"/></g><defs><clipPath id="h-c2"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
+      </button>
+      <div class="bn-avatar" title="Sarah Rogers">SR<span class="bn-avatar-dot"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="app-body">
+
+  <!-- ── Side Nav ──────────────────────────────────────── -->
+  <div class="bn-sidenav">
+    <div class="bn-sidenav-content">
+      <button class="bn-nav-item" title="Home">
+        <span class="bn-nav-indicator"></span>
+        <span class="bn-nav-icon-wrap"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.12109 0.734287C7.1179 -0.1836 8.61361 -0.240692 9.67285 0.562412L14.3154 4.85831C14.7565 5.36123 15 6.00758 15 6.68253V13.2499C14.9999 14.7711 13.7734 15.9999 12.25 15.9999H3.75C2.22664 15.9999 1.00011 14.7711 1 13.2499V6.74991C1 6.00472 1.30018 5.19442 1.88574 4.65226L6.12012 0.735263L6.12109 0.734287ZM8.86133 1.83585C8.37261 1.38747 7.62622 1.38714 7.1377 1.83585L7.13867 1.83683L2.9043 5.75284C2.66358 5.97588 2.5 6.36779 2.5 6.74991V13.2499C2.50011 13.9434 3.05576 14.4999 3.75 14.4999H5V9.74991C5 8.7755 5.78914 7.99991 6.75 7.99991H9.25C10.2109 7.99991 11 8.7755 11 9.74991V14.4999H12.25C12.9442 14.4999 13.4999 13.9434 13.5 13.2499V6.68253C13.5 6.37095 13.3888 6.0759 13.1875 5.84659L8.86133 1.83585ZM6.75 9.49991C6.61086 9.49991 6.5 9.61062 6.5 9.74991V14.4999H9.5V9.74991C9.5 9.61062 9.38914 9.49991 9.25 9.49991H6.75Z" fill="#131E29"/></svg></span>
+      </button>
+      <button class="bn-nav-item active" title="Supply Chain Exceptions">
+        <span class="bn-nav-indicator"></span>
+        <span class="bn-nav-icon-wrap"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#box-c2)"><path d="M8.72852 0.0459257C8.9254 -0.0262799 9.14363 -0.0129243 9.33008 0.0830351L14.1064 2.54983C14.1862 2.6051 14.2544 2.67597 14.3076 2.75784L15.8789 5.17483C15.9578 5.29636 15.9999 5.43812 16 5.58303V12.0274C16 12.3342 15.8132 12.6108 15.5283 12.7246L7.45215 15.9463C7.25126 16.0265 7.02561 16.0164 6.83301 15.918L0.40918 12.6348C0.158435 12.5067 0.000153832 12.2494 0 11.9678V3.77053C0.00013556 3.45604 0.196903 3.17473 0.492188 3.06643L8.72852 0.0459257ZM2.62305 3.88186L6.00684 5.6094C6.08726 5.66448 6.15714 5.7344 6.21094 5.81643L7.82129 8.27347C7.90185 8.39632 7.94479 8.54062 7.94434 8.68753L7.92676 14.1416L10.4727 13.126V7.67581L9.46191 7.14261C9.2162 7.01269 9.0625 6.75747 9.0625 6.47952V5.1885L4.87695 3.05569L2.62305 3.88186ZM1.5 11.5088L6.42676 14.0254L6.44238 9.24514L5.35449 8.48343C5.1541 8.34308 5.03517 8.11383 5.03516 7.86917V6.79007L1.5 4.99319V11.5088ZM6.79785 2.35061L10.0352 4.00882C10.1153 4.06384 10.1846 4.13401 10.2383 4.21585L11.8496 6.67288C11.9296 6.79499 11.9727 6.93804 11.9727 7.08401V12.5274L14.5 11.5186V6.01858L13.4932 5.49319C13.2457 5.36384 13.0898 5.10737 13.0898 4.82815V3.70608L8.93555 1.56741L6.79785 2.35061Z" fill="#131E29"/></g><defs><clipPath id="box-c2"><rect width="16" height="16" fill="white"/></clipPath></defs></svg></span>
+      </button>
+    </div>
+    <div class="bn-sidenav-footer">
+      <div class="bn-sidenav-sep"></div>
+      <button class="bn-footer-write" title="Write New">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#wn-c2)"><path d="M11.6211 0.521484C12.3048 -0.164901 13.4165 -0.165443 14.1006 0.520508L15.4844 1.9082C16.1673 2.59302 16.1649 3.70249 15.4795 4.38477L4.0293 15.7812C3.88875 15.9211 3.6983 16 3.5 16H0.75C0.335844 16 9.32638e-05 15.6641 0 15.25V12.5C3.2296e-05 12.3017 0.0787857 12.1112 0.21875 11.9707L11.6211 0.521484ZM15.25 10C15.6642 10 16 10.3358 16 10.75V14.25C16 15.2157 15.218 15.9998 14.251 16H10.75C10.3358 16 10 15.6642 10 15.25C10 14.8358 10.3358 14.5 10.75 14.5H14.251C14.3882 14.4998 14.5 14.3886 14.5 14.25V10.75C14.5 10.3358 14.8358 10 15.25 10ZM1.80762 12.5L3.49902 14.1904L11.4346 6.29297L9.69238 4.58203L1.80762 12.5ZM13.0381 1.58008C12.9404 1.48215 12.7812 1.48209 12.6836 1.58008L10.751 3.51953L12.498 5.23535L14.4219 3.32129C14.5194 3.22379 14.5193 3.06548 14.4219 2.96777L13.0381 1.58008Z" fill="#131E29"/></g><defs><clipPath id="wn-c2"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
+      </button>
+      <button class="bn-footer-icon" title="Widgets">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#wid-c2)"><path d="M15.8266 9.39684C16.055 9.62953 16.055 10.0069 15.8266 10.2396L14.4193 11.6693C14.4243 11.688 15.1384 14.3497 15.2455 14.93C15.3527 15.5121 14.8724 15.6371 14.7318 15.6253C14.5912 15.6136 14.4112 15.5473 14.3119 15.39L12.9555 13.1566L11.7768 14.3548L12.0033 15.4398C12.0355 15.5945 11.9886 15.7559 11.8783 15.8675C11.6599 16.0888 11.2933 16.0334 11.1478 15.7562L10.599 14.7093L9.56972 14.1527C9.29682 14.0051 9.24179 13.6314 9.46035 13.4095C9.57013 13.2974 9.72908 13.2509 9.88124 13.2826L10.9486 13.513L12.1273 12.3148L9.93007 10.9359C9.6781 10.7774 9.65371 10.4503 9.79824 10.2308C9.98258 9.95089 10.3059 9.98719 10.5863 10.0609L13.5912 10.8275L14.9984 9.39684C15.227 9.16542 15.5975 9.16543 15.8266 9.39684Z" fill="#131E29"/></g><defs><clipPath id="wid-c2"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Main ──────────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Object Page Header -->
+    <div class="obj-header">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="exception_management_card.html">Supply Chain Exceptions</a>
+        <span class="breadcrumb-sep">/</span>
+        <span style="color:var(--label)">Exception Details</span>
+        <span class="breadcrumb-sep">/</span>
+      </div>
+
+      <!-- Title -->
+      <div class="obj-title-row">
+        <div class="obj-title">Forecast Alert: Commit Shortage — Volterra Components · Plant US01</div>
+        <div class="obj-subtitle">Critical commitment shortage detected for Weeks 4–6 production</div>
+      </div>
+
+      <!-- AI Recommendation card -->
+      <div class="ai-rec-card" id="aiRecCard">
+        <div class="ai-rec-card-left">
+          <div class="ai-rec-title-row">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#da-ai)"><path d="M12 0C12.2475 2.04033e-05 12.4794 0.121993 12.6192 0.326274L15.8692 5.07776C16.05 5.34206 16.0426 5.69214 15.8516 5.94913L8.60158 15.7022C8.30639 16.0993 7.69364 16.0993 7.39844 15.7022L0.148377 5.94913C-0.0426493 5.69213 -0.0499916 5.34207 0.130799 5.07776L3.43747 0.253986C3.57884 0.0936257 3.78332 0 3.99997 0H12ZM9.16994 3.23441C9.27994 2.92338 9.7201 2.92338 9.83011 3.23441C10.2001 4.31779 10.68 4.8094 11.7598 5.17057C12.0798 5.28093 12.0798 5.73255 11.7598 5.83288C10.68 6.20408 10.1901 6.68566 9.83011 7.76904C9.7201 8.08007 9.27994 8.08007 9.16994 7.76904C8.79998 6.68567 8.31999 6.19405 7.24024 5.83288C6.92024 5.72252 6.92024 5.2709 7.24024 5.17057C8.31999 4.79937 8.80998 4.31778 9.16994 3.23441Z" fill="#0057b8"/></g><defs><clipPath id="da-ai"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
+            <strong>AI Recommendation</strong>
+          </div>
+          <div class="ai-rec-body">
+            Volterra Components has an active commit shortage of <strong>80 units/week</strong> (largest single material shortage this week). Need-by date is in 9 days. All three signals point to the same underlying fulfilment risk. Addressing Volterra directly is likely to resolve all three simultaneously.
+          </div>
+        </div>
+        <div class="ai-rec-card-right">
+          Agent recommends email supplier about this situation and ask for how to resolve it.
+          <div class="ai-rec-links">
+            <a class="ai-rec-link">• Forecast Alert Document ID: FA-2026-0324-001</a>
+            <a class="ai-rec-link">• Purchase Orders 4500001010–1012</a>
+          </div>
+          <div class="ai-rec-actions">
+            <button class="btn-accept" id="acceptBtn" onclick="acceptRec()">Accept</button>
+            <button class="btn-dismiss" onclick="dismissRec()">Dismiss</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-item active" onclick="switchTab(this)">Projected Commits</button>
+        <button class="tab-item" onclick="switchTab(this)">Impacted</button>
+        <button class="tab-item" onclick="switchTab(this)">Alternative</button>
+        <button class="tab-item" onclick="switchTab(this)">Inventory Forecast</button>
+        <button class="tab-item" onclick="switchTab(this)">Transfer Time</button>
+        <button class="tab-item" onclick="switchTab(this)">Supplier Chain Map</button>
+        <button class="tab-item" onclick="switchTab(this)">SC Relationship</button>
+        <button class="tab-item" onclick="switchTab(this)">Learning</button>
+      </div>
+    </div><!-- /obj-header -->
+
+    <!-- Object Page Content -->
+    <div class="obj-content">
+
+      <div class="tbl-card">
+        <div class="tbl-toolbar">
+          <!-- delete icon -->
+          <button class="tbl-icon-btn" title="Delete selected">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM4.5 2.5v-1A2 2 0 0 1 6.5 0h3A2 2 0 0 1 11.5 1.5v1h2.25a.75.75 0 0 1 0 1.5H13v9A2 2 0 0 1 11 15H5A2 2 0 0 1 3 13V4H2.25a.75.75 0 0 1 0-1.5H4.5ZM4.5 4v9a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V4H4.5Z" fill="#556b82"/></svg>
+          </button>
+          <!-- copy/export icon -->
+          <button class="tbl-icon-btn" title="Export">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10.5 1a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1H11v3a.5.5 0 0 1-1 0V5.5H7a.5.5 0 0 1 0-1h3V1.5a.5.5 0 0 1 .5-.5ZM1 7.5A1.5 1.5 0 0 1 2.5 6H5a.5.5 0 0 1 0 1H2.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V11a.5.5 0 0 1 1 0v2.5A1.5 1.5 0 0 1 13.5 15h-11A1.5 1.5 0 0 1 1 13.5v-6Z" fill="#556b82"/></svg>
+          </button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="cb-col"><input type="checkbox" id="chkAll" onclick="toggleAll(this)"/></th>
+              <th>Alert Created Date</th>
+              <th>Supplier</th>
+              <th>Part Number</th>
+              <th>Location</th>
+              <th class="num">Forecast</th>
+              <th class="num">Forecast Commit</th>
+              <th class="num">Difference</th>
+              <th>Week of Exception</th>
+              <th class="num">Week of Impact</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cb-col"><input type="checkbox"/></td>
+              <td>Dec 08, 2025</td>
+              <td>Volterra Components</td>
+              <td>VLT-XCOMP-680</td>
+              <td>4260 — Plant US01</td>
+              <td class="num val-blue"><a href="forecast_detail.html" class="tbl-link">680</a></td>
+              <td class="num val-red">120</td>
+              <td class="num">560</td>
+              <td>Feb 02, 2026</td>
+              <td class="num">8</td>
+              <td><button class="del-btn" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM4.5 2.5v-1A2 2 0 0 1 6.5 0h3A2 2 0 0 1 11.5 1.5v1h2.25a.75.75 0 0 1 0 1.5H13v9A2 2 0 0 1 11 15H5A2 2 0 0 1 3 13V4H2.25a.75.75 0 0 1 0-1.5H4.5ZM4.5 4v9a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V4H4.5Z" fill="#556b82"/></svg></button></td>
+            </tr>
+            <tr>
+              <td class="cb-col"><input type="checkbox"/></td>
+              <td>Dec 08, 2025</td>
+              <td>Volterra Components</td>
+              <td>VLT-XCOMP-680</td>
+              <td>4260 — Plant US01</td>
+              <td class="num val-blue"><a href="forecast_detail.html" class="tbl-link">700</a></td>
+              <td class="num val-red">340</td>
+              <td class="num">360</td>
+              <td>Feb 02, 2026</td>
+              <td class="num">6</td>
+              <td><button class="del-btn" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM4.5 2.5v-1A2 2 0 0 1 6.5 0h3A2 2 0 0 1 11.5 1.5v1h2.25a.75.75 0 0 1 0 1.5H13v9A2 2 0 0 1 11 15H5A2 2 0 0 1 3 13V4H2.25a.75.75 0 0 1 0-1.5H4.5ZM4.5 4v9a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V4H4.5Z" fill="#556b82"/></svg></button></td>
+            </tr>
+            <tr>
+              <td class="cb-col"><input type="checkbox"/></td>
+              <td>Dec 08, 2025</td>
+              <td>Volterra Components</td>
+              <td>VLT-XCOMP-680</td>
+              <td>4260 — Plant US01</td>
+              <td class="num val-blue"><a href="forecast_detail.html" class="tbl-link">800</a></td>
+              <td class="num val-red">450</td>
+              <td class="num">350</td>
+              <td>Feb 02, 2026</td>
+              <td class="num">9</td>
+              <td><button class="del-btn" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM4.5 2.5v-1A2 2 0 0 1 6.5 0h3A2 2 0 0 1 11.5 1.5v1h2.25a.75.75 0 0 1 0 1.5H13v9A2 2 0 0 1 11 15H5A2 2 0 0 1 3 13V4H2.25a.75.75 0 0 1 0-1.5H4.5ZM4.5 4v9a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V4H4.5Z" fill="#556b82"/></svg></button></td>
+            </tr>
+            <tr>
+              <td class="cb-col"><input type="checkbox"/></td>
+              <td>Dec 08, 2025</td>
+              <td>Volterra Components</td>
+              <td>VLT-XCOMP-680</td>
+              <td>4260 — Plant US01</td>
+              <td class="num val-blue"><a href="forecast_detail.html" class="tbl-link">600</a></td>
+              <td class="num val-red">280</td>
+              <td class="num">320</td>
+              <td>Feb 02, 2026</td>
+              <td class="num">8</td>
+              <td><button class="del-btn" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM4.5 2.5v-1A2 2 0 0 1 6.5 0h3A2 2 0 0 1 11.5 1.5v1h2.25a.75.75 0 0 1 0 1.5H13v9A2 2 0 0 1 11 15H5A2 2 0 0 1 3 13V4H2.25a.75.75 0 0 1 0-1.5H4.5ZM4.5 4v9a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V4H4.5Z" fill="#556b82"/></svg></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /obj-content -->
+
+  </div><!-- /main -->
+
+  <!-- Right icon strip -->
+  <div class="right-icon-strip">
+    <button class="right-icon-btn" title="Open in new tab">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 1h5v5h-1.5V3.56L7.28 9.78 6.22 8.72l6.22-6.22H10V1ZM2 3h6v1.5H3.5v9h9V9H14v5a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" fill="#556b82"/></svg>
+    </button>
+    <button class="right-icon-btn" title="Upload">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1a.75.75 0 0 1 .75.75v7.69l2.47-2.47a.75.75 0 1 1 1.06 1.06L8.53 11.78a.75.75 0 0 1-1.06 0L3.72 8.03a.75.75 0 1 1 1.06-1.06L7.25 9.44V1.75A.75.75 0 0 1 8 1ZM2 13.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" fill="#556b82"/></svg>
+    </button>
+    <button class="right-icon-btn" title="Copy link">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6.22 8.72a3.5 3.5 0 0 0 4.95 0l2-2a3.5 3.5 0 0 0-4.95-4.95l-1 1a.75.75 0 1 0 1.06 1.06l1-.999a2 2 0 1 1 2.83 2.828l-2 2a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.061ZM9.78 7.28a3.5 3.5 0 0 0-4.95 0l-2 2a3.5 3.5 0 0 0 4.95 4.95l1-1a.75.75 0 1 0-1.06-1.06l-1 1a2 2 0 1 1-2.83-2.83l2-2a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06Z" fill="#556b82"/></svg>
+    </button>
+    <button class="right-icon-btn" title="Print">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3h1a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1V2Zm2 0v3h4V2H6Zm-3 5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1v-2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2h1a.5.5 0 0 0 .5-.5v-4A.5.5 0 0 0 13 7H3Zm3 5v2h4v-2H6Z" fill="#556b82"/></svg>
+    </button>
+  </div>
+
+</div><!-- /app-body -->
+
+<script>
+  function acceptRec() {
+    var card = document.getElementById('aiRecCard');
+    card.style.background = '#f0fff4';
+    card.style.borderColor = '#a3d9b0';
+    var btn = document.getElementById('acceptBtn');
+    btn.textContent = '✓ Accepted';
+    btn.style.background = '#256f3a';
+    btn.style.borderColor = '#256f3a';
+    btn.disabled = true;
+  }
+
+  function dismissRec() {
+    document.getElementById('aiRecCard').style.display = 'none';
+  }
+
+  function switchTab(el) {
+    document.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  function toggleAll(cb) {
+    document.querySelectorAll('.data-table tbody input[type=checkbox]').forEach(function(c) {
+      c.checked = cb.checked;
+    });
+  }
+</script>
+
+</body>
+</html>

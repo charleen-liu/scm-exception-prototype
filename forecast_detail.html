@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forecast — SAP Business Network</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:      #0070f2;
+      --white:      #ffffff;
+      --page-bg:    #f5f6f7;
+      --title:      #1d2d3e;
+      --label:      #556b82;
+      --border:     #e5e5e5;
+      --border-mid: #d9d9d9;
+      --urgent:     #bb0000;
+      --positive:   #256f3a;
+      --ai-blue:    #0057b8;
+      --info:       #0064d9;
+      --radius-sm:  4px;
+      --radius:     8px;
+    }
+
+    body {
+      font-family: "72","72full",Arial,Helvetica,sans-serif;
+      font-size: 14px;
+      background: var(--page-bg);
+      color: var(--title);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Shell Bar ─────────────────────────────────────────── */
+    .bn-shell {
+      display: flex; align-items: center;
+      background: #fff;
+      padding: 8px 48px 8px 14px;
+      gap: 120px; flex-shrink: 0;
+      box-shadow: 0 0 2px rgba(34,54,73,.2), 0 2px 4px rgba(34,54,73,.2);
+      z-index: 100; position: relative; height: 52px;
+    }
+    .bn-shell-left { display: flex; align-items: center; gap: 16px; height: 52px; flex-shrink: 0; }
+    .bn-shell-menu-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; border: none;
+      background: transparent; cursor: pointer; flex-shrink: 0;
+    }
+    .bn-shell-menu-btn:hover { background: rgba(0,0,0,.06); }
+    .bn-shell-brand-text { font-size: 16px; font-weight: 700; color: #002a86; }
+    .bn-shell-center {
+      position: absolute; left: 0; right: 0;
+      display: flex; justify-content: center; pointer-events: none;
+    }
+    .bn-shell-right {
+      margin-left: auto; display: flex; align-items: center; gap: 4px;
+    }
+    .bn-icon-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px; border: none;
+      background: transparent; cursor: pointer; color: var(--label);
+    }
+    .bn-icon-btn:hover { background: rgba(0,0,0,.05); }
+    .bn-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #0070f2; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .bn-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: #f0ab00; margin-left: 2px; }
+    .bn-env-label { font-size: 13px; color: var(--label); margin-right: 8px; }
+
+    /* ── Left Icon Nav ─────────────────────────────────────── */
+    .layout { display: flex; flex: 1; overflow: hidden; }
+    .left-nav {
+      width: 48px; background: #fff;
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 8px; gap: 2px; flex-shrink: 0;
+    }
+    .nav-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--label); border: none; background: transparent;
+    }
+    .nav-icon:hover { background: rgba(0,0,0,.05); }
+    .nav-icon.active { background: rgba(0,100,217,.1); color: var(--info); }
+
+    /* ── Main Content ──────────────────────────────────────── */
+    .main {
+      flex: 1; overflow-y: auto;
+      padding: 0 20px 24px 20px;
+      margin-right: 44px; /* right icon strip */
+    }
+
+    /* ── Breadcrumb ────────────────────────────────────────── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      padding: 12px 0 6px 0;
+      font-size: 13px; color: var(--info);
+    }
+    .breadcrumb a { color: var(--info); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb span { color: var(--label); }
+
+    /* ── Page Header ───────────────────────────────────────── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 4px 0 12px 0;
+    }
+    .page-title { font-size: 20px; font-weight: 700; color: var(--title); }
+    .btn-view-comments {
+      padding: 0 14px; height: 30px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-mid); background: #fff;
+      font-size: 13px; color: var(--title); cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-view-comments:hover { background: #f5f6f7; }
+
+    /* ── AI Recommendation Strip ───────────────────────────── */
+    .ai-strip {
+      background: #fff;
+      border: 1px solid var(--border-mid);
+      border-left: 3px solid var(--info);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 14px;
+    }
+    .ai-strip-title {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 700; color: var(--title);
+      margin-bottom: 4px;
+    }
+    .ai-strip-body {
+      font-size: 13px; color: var(--label);
+      margin-bottom: 10px;
+    }
+    .ai-strip-meta {
+      display: flex; align-items: flex-start; gap: 32px;
+      flex-wrap: wrap;
+    }
+    .ai-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .ai-meta-label { font-size: 12px; font-weight: 700; color: var(--title); }
+    .ai-meta-val { font-size: 13px; color: var(--label); max-width: 260px; }
+    .ai-priority-badge {
+      display: inline-block; padding: 2px 10px;
+      border-radius: 10px; border: 1px solid var(--urgent);
+      color: var(--urgent); font-size: 12px; font-weight: 600;
+    }
+    .ai-cost { color: var(--urgent); font-weight: 600; }
+    .ai-strip-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; padding-top: 4px; }
+    .btn-accept-strip {
+      padding: 0 18px; height: 32px;
+      background: var(--info); border: 1px solid var(--info);
+      color: #fff; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-accept-strip:hover { background: #0057b8; }
+    .btn-dismiss-strip {
+      padding: 0 14px; height: 32px;
+      background: #fff; border: 1px solid var(--border-mid);
+      color: var(--title); border-radius: var(--radius-sm);
+      font-size: 13px; cursor: pointer;
+    }
+    .btn-dismiss-strip:hover { background: #f5f6f7; }
+
+    /* ── Customer Info Panel ───────────────────────────────── */
+    .customer-panel {
+      background: #fff;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex; align-items: flex-start; gap: 18px;
+      margin-bottom: 14px;
+    }
+    .cust-icon {
+      width: 52px; height: 52px; border-radius: var(--radius-sm);
+      background: #f5f6f7; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .cust-info { flex: 0 0 220px; }
+    .cust-info p { font-size: 13px; color: var(--label); line-height: 1.7; }
+    .cust-info .cust-link { color: var(--info); text-decoration: none; font-size: 13px; }
+    .cust-info .cust-link:hover { text-decoration: underline; }
+    .cust-divider { width: 1px; background: var(--border); align-self: stretch; margin: 0 8px; }
+    .cust-fields {
+      display: flex; gap: 32px; flex-wrap: wrap; flex: 1; align-items: flex-start;
+    }
+    .cust-field { display: flex; flex-direction: column; gap: 2px; }
+    .cust-field-label { font-size: 12px; color: var(--label); font-weight: 600; }
+    .cust-field-val { font-size: 13px; color: var(--title); }
+    .cust-field-link { color: var(--info); text-decoration: none; font-size: 13px; font-weight: 600; }
+    .cust-field-link:hover { text-decoration: underline; }
+    .cust-field-link.green { color: var(--positive); }
+
+    /* ── Object Tabs ───────────────────────────────────────── */
+    .obj-tabs {
+      display: flex; border-bottom: 2px solid var(--border);
+      margin-bottom: 16px; gap: 0; background: #fff;
+      border-top: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      padding: 0 16px;
+    }
+    .obj-tab {
+      padding: 10px 16px; font-size: 13px; color: var(--label);
+      border: none; background: transparent; cursor: pointer;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      white-space: nowrap;
+    }
+    .obj-tab:hover { color: var(--title); }
+    .obj-tab.active {
+      color: var(--info); font-weight: 600;
+      border-bottom-color: var(--info);
+    }
+
+    /* ── Chart Section ─────────────────────────────────────── */
+    .chart-section {
+      background: #fff;
+      border: 1px solid var(--border-mid); border-top: none;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      padding: 16px 18px 0 18px;
+      margin-bottom: 2px;
+    }
+    .chart-controls {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .chart-title { font-size: 14px; font-weight: 700; color: var(--title); flex-shrink: 0; }
+    .chart-ctrl-group { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--label); }
+    .chart-ctrl-group label { font-size: 12px; color: var(--label); }
+    .chart-select {
+      height: 28px; border: 1px solid var(--border-mid); border-radius: var(--radius-sm);
+      padding: 0 8px; font-size: 13px; color: var(--title); background: #fff;
+      min-width: 110px;
+    }
+    .chart-date-input {
+      height: 28px; border: 1px solid var(--border-mid); border-radius: var(--radius-sm);
+      padding: 0 8px; font-size: 13px; color: var(--title); background: #fff;
+      width: 110px;
+    }
+    .chart-icon-group { display: flex; gap: 2px; margin-left: auto; }
+    .chart-icon-btn {
+      width: 28px; height: 28px; border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm); background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; color: var(--label);
+    }
+    .chart-icon-btn.active { background: #e8f0fe; border-color: var(--info); color: var(--info); }
+    .chart-icon-btn:hover { background: #f5f6f7; }
+    .chart-nav-btn {
+      width: 28px; height: 28px; border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm); background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; color: var(--label);
+    }
+
+    /* Chart Canvas */
+    .chart-wrap { position: relative; width: 100%; height: 220px; margin-bottom: 6px; }
+    canvas#forecastChart { display: block; }
+
+    /* Range Slider */
+    .chart-range-bar {
+      width: 100%; height: 28px;
+      background: #f5f6f7; border: 1px solid var(--border);
+      border-radius: 4px; display: flex; align-items: center;
+      padding: 0 8px; gap: 6px; margin-bottom: 8px; font-size: 11px; color: var(--label);
+    }
+    .range-track {
+      flex: 1; height: 4px; background: var(--border);
+      border-radius: 2px; position: relative;
+    }
+    .range-fill {
+      position: absolute; left: 5%; width: 40%;
+      height: 100%; background: var(--info); border-radius: 2px;
+    }
+    .range-timeline {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--label);
+      padding: 0 0 10px 0;
+    }
+
+    /* Legend */
+    .chart-legend {
+      display: flex; gap: 18px; align-items: center;
+      padding: 6px 0 14px 0; flex-wrap: wrap; font-size: 12px; color: var(--label);
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-line { width: 20px; height: 2px; border-radius: 1px; }
+    .legend-line.solid { background: #8b5cf6; }
+    .legend-line.dashed { background: transparent; border-top: 2px dashed #8b5cf6; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .legend-bar { width: 12px; height: 12px; border-radius: 2px; }
+
+    /* AI Recommend label on chart area */
+    .chart-ai-row {
+      display: flex; justify-content: flex-end; align-items: center;
+      gap: 8px; padding: 4px 0 8px 0;
+    }
+    .chart-ai-lbl {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 12px; color: var(--info); font-weight: 600;
+    }
+
+    /* ── Key Figures Table ─────────────────────────────────── */
+    .kf-section {
+      background: #fff;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius-sm);
+      overflow-x: auto;
+      margin-top: 14px;
+    }
+    .kf-table {
+      width: 100%; border-collapse: collapse;
+      min-width: 900px;
+    }
+    .kf-table thead tr {
+      background: #f5f6f7;
+    }
+    .kf-table th {
+      padding: 8px 12px; text-align: right;
+      font-size: 12px; font-weight: 700; color: var(--label);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .kf-table th:first-child { text-align: left; min-width: 160px; }
+    .kf-table th.locked {
+      display: flex; align-items: center; gap: 4px;
+      justify-content: flex-end;
+    }
+    .kf-table td {
+      padding: 7px 12px; text-align: right;
+      font-size: 13px; color: var(--title);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .kf-table td:first-child {
+      text-align: left; font-size: 13px; color: var(--info);
+      text-decoration: underline; cursor: pointer;
+    }
+    .kf-table td:first-child:hover { color: var(--ai-blue); }
+    .kf-table tbody tr:hover td { background: #f9fafb; }
+    .kf-table .cell-alert {
+      background: #fde8e8; color: var(--urgent);
+      border-radius: 2px; font-weight: 700;
+    }
+    .kf-table .cell-alert-dot::before {
+      content: "● "; color: var(--urgent);
+    }
+    .kf-table tfoot td {
+      font-size: 12px; color: var(--label);
+      border-top: 1px solid var(--border);
+      padding: 8px 12px;
+    }
+
+    /* ── Right Icon Strip ──────────────────────────────────── */
+    .right-icon-strip {
+      position: fixed; right: 0; top: 52px;
+      width: 44px; height: calc(100vh - 52px);
+      background: #fff; border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 12px; gap: 6px; z-index: 10;
+    }
+    .strip-icon {
+      width: 32px; height: 32px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--label);
+    }
+    .strip-icon:hover { background: rgba(0,0,0,.06); }
+  </style>
+</head>
+<body>
+
+<!-- ── Shell Bar ───────────────────────────────────────────── -->
+<div class="bn-shell">
+  <div class="bn-shell-left">
+    <button class="bn-shell-menu-btn">
+      <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+        <rect x="1" y="3" width="14" height="1.5" rx=".75" fill="#556b82"/>
+        <rect x="1" y="7.25" width="14" height="1.5" rx=".75" fill="#556b82"/>
+        <rect x="1" y="11.5" width="14" height="1.5" rx=".75" fill="#556b82"/>
+      </svg>
+    </button>
+    <!-- SAP Logo -->
+    <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><clipPath id="sap-clip-fc"><rect width="40" height="20" rx="2"/></clipPath></defs>
+      <rect width="40" height="20" rx="2" fill="#1873C8"/>
+      <text x="4" y="15" font-family="Arial" font-size="13" font-weight="900" fill="white">SAP</text>
+    </svg>
+    <span class="bn-shell-brand-text">Business Network</span>
+    <div style="width:8px;height:8px;border-radius:50%;background:#f0ab00;margin-left:-8px;margin-top:-10px;"></div>
+  </div>
+  <div class="bn-shell-center">
+    <div style="display:flex;align-items:center;background:#eff1f2;border-radius:18px;box-shadow:inset 0 0 0 1px rgba(85,107,129,.25);padding:4px 12px;height:36px;width:380px;pointer-events:all;">
+      <span style="font-size:13px;color:#556b82;margin-right:6px;">Enterprise</span>
+      <div style="width:1px;height:20px;background:#d9d9d9;margin:0 8px;"></div>
+      <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.5" stroke="#556b82" stroke-width="1.5"/><path d="m11 11 3 3" stroke="#556b82" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="bn-shell-right">
+    <span class="bn-env-label">Enterprise</span>
+    <button class="bn-icon-btn" title="Search"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.5" stroke="#556b82" stroke-width="1.5"/><path d="m11 11 3 3" stroke="#556b82" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    <button class="bn-icon-btn"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M6.5 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9ZM1 6.5a5.5 5.5 0 1 1 9.93 3.27l3.4 3.4-.7.7-3.4-3.4A5.5 5.5 0 0 1 1 6.5Z" fill="#556b82"/></svg></button>
+    <button class="bn-icon-btn"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M8 1a5 5 0 0 1 5 5v3l1.5 2H1.5L3 9V6a5 5 0 0 1 5-5ZM6.5 13h3a1.5 1.5 0 0 1-3 0Z" stroke="#556b82" stroke-width="1.2"/></svg></button>
+    <button class="bn-icon-btn"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 3h12v2H2zM2 7h12v2H2zM2 11h8v2H2z" fill="#556b82"/></svg></button>
+    <button class="bn-icon-btn"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" stroke="#556b82" stroke-width="1.2"/><circle cx="8" cy="6" r="2" stroke="#556b82" stroke-width="1.2"/><path d="M3.5 13c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="#556b82" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+    <div class="bn-avatar">SR</div>
+  </div>
+</div>
+
+<!-- ── Layout ──────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Left Nav -->
+  <div class="left-nav">
+    <button class="nav-icon"><svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M9 1L1 7v10h5v-5h6v5h5V7L9 1Z" stroke="#556b82" stroke-width="1.4"/></svg></button>
+    <button class="nav-icon"><svg width="18" height="18" fill="none" viewBox="0 0 18 18"><rect x="2" y="2" width="6" height="6" rx="1" stroke="#556b82" stroke-width="1.4"/><rect x="10" y="2" width="6" height="6" rx="1" stroke="#556b82" stroke-width="1.4"/><rect x="2" y="10" width="6" height="6" rx="1" stroke="#556b82" stroke-width="1.4"/><rect x="10" y="10" width="6" height="6" rx="1" stroke="#556b82" stroke-width="1.4"/></svg></button>
+    <button class="nav-icon"><svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M3 4h12M3 9h12M3 14h8" stroke="#556b82" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+    <button class="nav-icon active"><svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M3 14V8l6-5 6 5v6M7 14v-4h4v4" stroke="#0064d9" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="exception_management_card.html">Supply Chain Exceptions</a>
+      <span>/</span>
+      <a href="exception_detail.html">Exception Details</a>
+      <span>/</span>
+      <span style="color:var(--title);">Forecast Alert</span>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">Forecast</div>
+      <button class="btn-view-comments">View Comments</button>
+    </div>
+
+    <!-- AI Recommendation Strip -->
+    <div class="ai-strip" id="aiStrip">
+      <div class="ai-strip-title">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1l1.5 4.5H14l-3.7 2.7 1.4 4.3L8 9.8 4.3 12.5l1.4-4.3L2 5.5h4.5L8 1Z" fill="#0064d9"/>
+        </svg>
+        AI Recommendation
+      </div>
+      <div class="ai-strip-body">Agent recommends email supplier about this situation and ask for how to resolve it.</div>
+      <div class="ai-strip-meta">
+        <div class="ai-meta-item">
+          <span class="ai-meta-label">Business Impact</span>
+          <span class="ai-meta-val">Production line stoppage affecting 3 manufacturing plants.</span>
+        </div>
+        <div class="ai-meta-item">
+          <span class="ai-meta-label">Root Cause</span>
+          <span class="ai-meta-val">Supplier production capacity issues and demand forecast</span>
+        </div>
+        <div class="ai-meta-item">
+          <span class="ai-meta-label">Priority <svg width="12" height="12" fill="none" viewBox="0 0 12 12" style="vertical-align:-1px"><circle cx="6" cy="6" r="5" stroke="#556b82" stroke-width="1.2"/><path d="M6 5v3M6 4v.5" stroke="#556b82" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+          <span class="ai-priority-badge">Urgent</span>
+        </div>
+        <div class="ai-meta-item">
+          <span class="ai-meta-label">Cost Impacted: <svg width="12" height="12" fill="none" viewBox="0 0 12 12" style="vertical-align:-1px"><circle cx="6" cy="6" r="5" stroke="#556b82" stroke-width="1.2"/><path d="M6 5v3M6 4v.5" stroke="#556b82" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+          <span class="ai-cost">$1,255,930</span>
+        </div>
+        <div class="ai-strip-actions">
+          <button class="btn-accept-strip" id="acceptStripBtn" onclick="acceptStrip()">Accept</button>
+          <button class="btn-dismiss-strip" onclick="dismissStrip()">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Info Panel -->
+    <div class="customer-panel">
+      <div class="cust-icon">
+        <svg width="28" height="28" fill="none" viewBox="0 0 28 28">
+          <rect x="4" y="8" width="20" height="16" rx="2" stroke="#556b82" stroke-width="1.4"/>
+          <path d="M9 8V6a5 5 0 0 1 10 0v2" stroke="#556b82" stroke-width="1.4"/>
+          <rect x="11" y="14" width="6" height="6" rx="1" stroke="#556b82" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="cust-info">
+        <p>Customer: <strong>Customer Inc.</strong></p>
+        <p>Phone Number: 589946637</p>
+        <p>Email: <a class="cust-link" href="#">werdec@customer.com</a></p>
+      </div>
+      <div class="cust-divider"></div>
+      <div class="cust-fields">
+        <div class="cust-field">
+          <span class="cust-field-label">Customer Part Number</span>
+          <a class="cust-field-link" href="#">IBP-NP1</a>
+        </div>
+        <div class="cust-field">
+          <span class="cust-field-label">Customer Location (Time Zone)</span>
+          <span class="cust-field-val">2800: South East Plant<br><span style="font-size:12px;color:var(--label)">(America/Los_Angeles)</span></span>
+        </div>
+        <div class="cust-field">
+          <span class="cust-field-label">Stock on Hand</span>
+          <a class="cust-field-link green" href="#">600 PC</a>
+        </div>
+        <div class="cust-field">
+          <span class="cust-field-label">Status</span>
+          <span class="cust-field-val">Active</span>
+        </div>
+        <div class="cust-field">
+          <span class="cust-field-label">Last Supplier Update</span>
+          <span class="cust-field-val">Jun 08, 2024</span>
+        </div>
+        <div class="cust-field">
+          <span class="cust-field-label">Last Data Sent</span>
+          <span class="cust-field-val">Jan 08, 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Object Page Tabs -->
+    <div class="obj-tabs">
+      <button class="obj-tab active" onclick="switchTab(this)">Overview</button>
+      <button class="obj-tab" onclick="switchTab(this)">Part Details</button>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-section">
+      <!-- Controls -->
+      <div class="chart-controls">
+        <span class="chart-title">10-Week Forecast Overview</span>
+        <div class="chart-ctrl-group">
+          <label>View by:</label>
+          <select class="chart-select"><option>Weekly</option><option>Monthly</option></select>
+        </div>
+        <div class="chart-ctrl-group">
+          <label>Jump to:</label>
+          <select class="chart-select" style="min-width:140px"><option>First Committable …</option></select>
+        </div>
+        <div class="chart-ctrl-group">
+          <label>Starting from:</label>
+          <input class="chart-date-input" type="text" value="05/03/2026"/>
+          <button class="chart-nav-btn"><svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M3 6h8M3 9h8M5 3h4" stroke="#556b82" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+        </div>
+        <div style="display:flex;align-items:center;gap:3px;margin-left:6px;">
+          <button class="chart-nav-btn">‹</button>
+          <button class="chart-nav-btn">›</button>
+        </div>
+        <div class="chart-icon-group">
+          <button class="chart-icon-btn active" title="Bar chart">
+            <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="6" width="3" height="7" rx=".5" fill="#0064d9"/><rect x="5.5" y="3" width="3" height="10" rx=".5" fill="#0064d9"/><rect x="10" y="5" width="3" height="8" rx=".5" fill="#0064d9"/></svg>
+          </button>
+          <button class="chart-icon-btn" title="Line chart">
+            <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1 11 4 6l3 3 3-5 3 2" stroke="#556b82" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="chart-icon-btn" title="Table view">
+            <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1" stroke="#556b82" stroke-width="1.2"/><path d="M1 4.5h12M1 8h12M5 4.5v8.5" stroke="#556b82" stroke-width="1.1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Recommend above chart -->
+      <div class="chart-ai-row">
+        <span class="chart-ai-lbl">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 4.5H14l-3.7 2.7 1.4 4.3L8 9.8 4.3 12.5l1.4-4.3L2 5.5h4.5L8 1Z" fill="#0064d9"/></svg>
+          AI Recommend
+        </span>
+        <button style="width:28px;height:28px;border:1px solid var(--border-mid);border-radius:4px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="#556b82" stroke-width="1.2"/><path d="M7 4.5v.5M7 6.5v3.5" stroke="#556b82" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Chart Canvas -->
+      <div class="chart-wrap">
+        <canvas id="forecastChart" width="1200" height="220" style="width:100%;height:220px;"></canvas>
+      </div>
+
+      <!-- Range bar -->
+      <div class="chart-range-bar">
+        <span>09/2024</span>
+        <div class="range-track">
+          <div class="range-fill"></div>
+        </div>
+        <span>09/2025</span>
+      </div>
+      <div class="range-timeline">
+        <span>09/2024</span><span>10-Week</span><span>20-Week</span><span>30-Week</span><span>40-week</span><span>09/2025</span>
+      </div>
+
+      <!-- Legend -->
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-line solid"></div><span>Current Forecast</span></div>
+        <div class="legend-item"><div class="legend-line dashed"></div><span>Previous Forecast</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#256f3a;"></div><span>Firmed Orders</span></div>
+        <div class="legend-item"><div class="legend-bar" style="background:#7c3aed;opacity:.7"></div><span>Forecast</span></div>
+        <div class="legend-item"><div class="legend-bar" style="background:#3b82f6;opacity:.85"></div><span>Commit</span></div>
+      </div>
+    </div>
+
+    <!-- Key Figures Table -->
+    <div class="kf-section">
+      <table class="kf-table">
+        <thead>
+          <tr>
+            <th>Key Figures</th>
+            <th><span style="display:flex;align-items:center;gap:3px;justify-content:flex-end;"><svg width="11" height="11" fill="none" viewBox="0 0 12 14"><rect x="1" y="3" width="10" height="10" rx="1" stroke="#556b82" stroke-width="1.2"/><path d="M1 6h10M4 1v4M8 1v4" stroke="#556b82" stroke-width="1.1" stroke-linecap="round"/></svg> 05/03/2026</span></th>
+            <th>05/10/2026</th>
+            <th>05/17/2026</th>
+            <th>05/24/2026</th>
+            <th>05/31/2026</th>
+            <th>06/07/2026</th>
+            <th>06/14/2026</th>
+            <th>06/21/2026</th>
+            <th>06/28/2026</th>
+            <th>07/05/2026</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Forecast</td>
+            <td>15220</td><td>15420</td><td>15420</td><td>19100</td>
+            <td>10000</td><td>8000</td><td>6000</td><td>9600</td><td>17000</td><td>14500</td>
+          </tr>
+          <tr>
+            <td>Forecast Commit</td>
+            <td>154</td><td>120</td><td>425</td><td class="cell-alert cell-alert-dot">120</td>
+            <td>647</td><td>877</td><td>492</td><td>426</td><td>583</td><td>994</td>
+          </tr>
+          <tr>
+            <td>Forecast Deviation</td>
+            <td>922</td><td>177</td><td>647</td><td>536</td>
+            <td>556</td><td>826</td><td>130</td><td>647</td><td>561</td><td>185</td>
+          </tr>
+          <tr>
+            <td>Firmed Orders</td>
+            <td>492</td><td>600</td><td>130</td><td>185</td>
+            <td>540</td><td>130</td><td>561</td><td>583</td><td>447</td><td>453</td>
+          </tr>
+          <tr>
+            <td>Previous Forecast</td>
+            <td>583</td><td>877</td><td>540</td><td>647</td>
+            <td>429</td><td>703</td><td>536</td><td>816</td><td>826</td><td>647</td>
+          </tr>
+          <tr>
+            <td>Cumulative Forecast</td>
+            <td>994</td><td>740</td><td>826</td><td>816</td>
+            <td>826</td><td>738</td><td>826</td><td>492</td><td>196</td><td>798</td>
+          </tr>
+          <tr>
+            <td>Key Figure Supplier</td>
+            <td>453</td><td>556</td><td>738</td><td>423</td>
+            <td>177</td><td>740</td><td>738</td><td>994</td><td>492</td><td>447</td>
+          </tr>
+          <tr>
+            <td>Forecast Based on Sales</td>
+            <td>12</td><td>18</td><td>3</td><td>18</td>
+            <td>16</td><td>6</td><td>20</td><td>30</td><td>11</td><td>5</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="11"><span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#e8f0fe;border-radius:2px;display:inline-block;border:1px solid var(--info)"></span> Lead time (2 Days)</span></td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- Right Icon Strip -->
+<div class="right-icon-strip">
+  <button class="strip-icon" title="Open in new window"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3" stroke="#556b82" stroke-width="1.3" stroke-linecap="round"/><path d="M9 2h5v5" stroke="#556b82" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2 8 8" stroke="#556b82" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+  <button class="strip-icon" title="Upload"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M8 10V3m0 0L5 6m3-3 3 3" stroke="#556b82" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12h10" stroke="#556b82" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+  <button class="strip-icon" title="Copy link"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M6 10a4 4 0 0 0 4 0l2-2a4 4 0 0 0-5.66-5.66L5 3.66" stroke="#556b82" stroke-width="1.3" stroke-linecap="round"/><path d="M10 6a4 4 0 0 0-4 0L4 8a4 4 0 0 0 5.66 5.66L11 12.34" stroke="#556b82" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+  <button class="strip-icon" title="Print"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"><rect x="3" y="6" width="10" height="7" rx="1" stroke="#556b82" stroke-width="1.3"/><path d="M5 6V3h6v3M5 10h6" stroke="#556b82" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+</div>
+
+<script>
+  /* ── Tab Switch ─────────────────────────────── */
+  function switchTab(el) {
+    document.querySelectorAll('.obj-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  /* ── AI Strip Accept/Dismiss ────────────────── */
+  function acceptStrip() {
+    var btn = document.getElementById('acceptStripBtn');
+    btn.textContent = '✓ Accepted'; btn.style.background = '#256f3a'; btn.style.borderColor = '#256f3a'; btn.disabled = true;
+  }
+  function dismissStrip() {
+    document.getElementById('aiStrip').style.display = 'none';
+  }
+
+  /* ── Draw Forecast Chart ────────────────────── */
+  (function drawChart() {
+    var canvas = document.getElementById('forecastChart');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.offsetWidth * window.devicePixelRatio || 1200;
+    var H = 220;
+    canvas.width = W; canvas.height = H;
+    ctx.scale(window.devicePixelRatio || 1, 1);
+    var cW = canvas.offsetWidth || 1200;
+
+    var weeks = ['05/03','05/10','05/17','05/24','05/31','06/07','06/14','06/21','06/28','07/05'];
+    var forecast = [152, 165, 180, 175, 100, 90, 60, 150, 200, 160];
+    var commit   = [180, 205, 95, 10, 175, 80, 150, 135, 215, 165];
+    var curFcast = [140, 168, 178, 158, 100, 90, 140, 150, 160, 158];
+    var prevFcast= [155, 160, 170, 160, 120, 110, 130, 155, 165, 162];
+
+    var padL = 48, padR = 10, padT = 14, padB = 28;
+    var chartW = cW - padL - padR;
+    var chartH = H - padT - padB;
+    var maxVal = 250;
+    var n = weeks.length;
+    var barW = Math.floor(chartW / n * 0.35);
+    var groupW = chartW / n;
+
+    /* Grid */
+    ctx.strokeStyle = '#e5e5e5'; ctx.lineWidth = 1;
+    [0, 50, 100, 150, 200].forEach(function(v) {
+      var y = padT + chartH - (v / maxVal) * chartH;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + chartW, y); ctx.stroke();
+      ctx.fillStyle = '#8fa3b4'; ctx.font = '11px Arial'; ctx.textAlign = 'right';
+      ctx.fillText((v >= 1000 ? (v/1000).toFixed(0)+'K' : v+'K').replace('0K','0'), padL - 4, y + 4);
+    });
+    ctx.fillText('200K', padL - 4, padT + 4);
+
+    /* Bars — Forecast (purple) then Commit (blue) side by side */
+    weeks.forEach(function(w, i) {
+      var cx = padL + i * groupW + groupW / 2;
+
+      /* Forecast bar (purple) */
+      var fH = (forecast[i] / maxVal) * chartH;
+      var fX = cx - barW - 2;
+      ctx.fillStyle = 'rgba(124,58,237,0.7)';
+      ctx.fillRect(fX, padT + chartH - fH, barW, fH);
+
+      /* Commit bar (blue) — except wk 4 (index 3) which is red/alert */
+      var cH = (commit[i] / maxVal) * chartH;
+      var cX = cx + 2;
+      if (i === 3) {
+        ctx.fillStyle = '#dc2626';
+      } else {
+        ctx.fillStyle = 'rgba(59,130,246,0.85)';
+      }
+      ctx.fillRect(cX, padT + chartH - cH, barW, cH);
+
+      /* X labels */
+      ctx.fillStyle = '#8fa3b4'; ctx.font = '10px Arial'; ctx.textAlign = 'center';
+      ctx.fillText(w+'/26', cx, H - padB + 12);
+    });
+
+    /* Current Forecast line (solid purple) */
+    ctx.beginPath(); ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 2; ctx.setLineDash([]);
+    curFcast.forEach(function(v, i) {
+      var x = padL + i * groupW + groupW / 2;
+      var y = padT + chartH - (v / maxVal) * chartH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    /* Previous Forecast line (dashed purple) */
+    ctx.beginPath(); ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+    prevFcast.forEach(function(v, i) {
+      var x = padL + i * groupW + groupW / 2;
+      var y = padT + chartH - (v / maxVal) * chartH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+  })();
+</script>
+</body>
+</html>
