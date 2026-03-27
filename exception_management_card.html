@@ -569,7 +569,87 @@
     }
     .filter-showing strong { color: var(--title); font-weight: 600; }
 
-    /* ── View toggle ──────────────────────────────────────────── */
+    /* ── AI filter bar ───────────────────────────────────────── */
+    .ai-filter-btn {
+      width: 28px; height: 28px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-mid); background: #fff;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: var(--label);
+      transition: background .12s, color .12s, border-color .12s;
+    }
+    .ai-filter-btn:hover { background: var(--ai-blue-bg); color: var(--ai-blue); border-color: var(--ai-blue-bd); }
+    .ai-filter-btn.active { background: var(--ai-blue-bg); color: var(--ai-blue); border-color: var(--ai-blue); }
+
+    .nl-filter-bar {
+      display: none; align-items: center; gap: 8px; flex: 1;
+    }
+    .nl-filter-bar.visible { display: flex; }
+    .toolbar-dropdowns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .toolbar-dropdowns.hidden { display: none; }
+
+    .nl-input-wrap {
+      flex: 1; display: flex; align-items: center; gap: 8px;
+      background: var(--ai-blue-bg);
+      border: 1px solid var(--ai-blue-bd);
+      border-radius: var(--radius-sm);
+      padding: 0 10px; height: 28px;
+      min-width: 220px;
+    }
+    .nl-input-wrap .nl-star {
+      color: var(--ai-blue); font-size: 14px; flex-shrink: 0; line-height: 1;
+    }
+    .nl-input {
+      flex: 1; border: none; background: transparent; outline: none;
+      font-family: inherit; font-size: 13px; color: var(--title);
+    }
+    .nl-input::placeholder { color: #90a4b7; font-style: italic; }
+    .nl-clear-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--label); font-size: 16px; padding: 0; line-height: 1;
+      flex-shrink: 0; display: none;
+    }
+    .nl-clear-btn.visible { display: block; }
+    .nl-clear-btn:hover { color: var(--title); }
+
+    .nl-chips {
+      display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+    }
+    .nl-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--ai-blue-bg); border: 1px solid var(--ai-blue-bd);
+      border-radius: 10px; padding: 2px 8px;
+      font-size: 11px; font-weight: 600; color: var(--ai-blue);
+    }
+    .nl-chip-x {
+      cursor: pointer; opacity: 0.6; font-size: 12px;
+    }
+    .nl-chip-x:hover { opacity: 1; }
+
+    .nl-suggestions {
+      position: absolute; z-index: 200;
+      background: #fff; border: 1px solid var(--border-mid);
+      border-radius: var(--radius); box-shadow: 0 4px 16px rgba(0,0,0,.1);
+      padding: 6px 0; min-width: 260px; margin-top: 2px;
+      display: none;
+    }
+    .nl-suggestions.visible { display: block; }
+    .nl-sug-item {
+      padding: 7px 14px; cursor: pointer; font-size: 13px; color: var(--title);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nl-sug-item:hover { background: var(--ai-blue-bg); }
+    .nl-sug-item .nl-sug-icon { color: var(--ai-blue); font-size: 13px; }
+    .nl-sug-item .nl-sug-desc { font-size: 11px; color: var(--label); margin-left: auto; }
+
+    .nl-thinking {
+      font-size: 12px; color: var(--ai-blue); display: none; align-items: center; gap: 5px;
+      white-space: nowrap;
+    }
+    .nl-thinking.visible { display: flex; }
+    @keyframes nlDot { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+    .nl-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ai-blue); display: inline-block; animation: nlDot 1.2s infinite; }
+    .nl-dot:nth-child(2) { animation-delay: .2s; }
+    .nl-dot:nth-child(3) { animation-delay: .4s; }
     .view-toggle {
       display: flex; align-items: center; gap: 0;
       border: 1px solid var(--border-mid); border-radius: var(--radius-sm);
@@ -873,29 +953,75 @@
       <div class="list-toolbar">
         <span class="list-title">Exception Inbox <span class="list-count" id="inboxCount">9</span></span>
         <div class="toolbar-filters">
-          <select class="filter-select" id="filterType" onchange="applyFilters()">
-            <option value="all">All Types</option>
-            <option value="Forecast">Forecast</option>
-            <option value="OC">Order Confirmation</option>
-            <option value="ASN">ASN</option>
-            <option value="Quality">Quality</option>
-          </select>
-          <select class="filter-select" id="filterSupplier" onchange="applyFilters()">
-            <option value="all">All Suppliers</option>
-            <option value="volterra">Volterra Components</option>
-            <option value="apex">Apex Precision</option>
-            <option value="global">Global Parts Ltd</option>
-            <option value="simco">Simco Electronics</option>
-            <option value="meridian">Meridian Fasteners</option>
-            <option value="crestline">Crestline Supply</option>
-            <option value="precision">Precision Metals</option>
-          </select>
-          <select class="filter-select" id="filterPriority" onchange="applyFilters()">
-            <option value="all">All Priorities</option>
-            <option value="urgent">Urgent</option>
-            <option value="high">High</option>
-            <option value="resolved">Resolved only</option>
-          </select>
+          <!-- AI filter button -->
+          <button class="ai-filter-btn" id="aiFilterBtn" onclick="toggleAiFilter()" title="Filter with AI">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 0.5C8.27 0.5 8.5 0.73 8.5 1L8.5 2.06C9.97 2.28 11.16 3.23 11.71 4.5H14.5C14.78 4.5 15 4.72 15 5C15 5.28 14.78 5.5 14.5 5.5H11.95C12 5.82 12 6.16 11.95 6.5H14.5C14.78 6.5 15 6.72 15 7C15 7.28 14.78 7.5 14.5 7.5H11.71C11.16 8.77 9.97 9.72 8.5 9.94V11C8.5 11.27 8.27 11.5 8 11.5C7.73 11.5 7.5 11.27 7.5 11V9.94C6.03 9.72 4.84 8.77 4.29 7.5H1.5C1.22 7.5 1 7.28 1 7C1 6.72 1.22 6.5 1.5 6.5H4.05C4 6.16 4 5.82 4.05 5.5H1.5C1.22 5.5 1 5.28 1 5C1 4.72 1.22 4.5 1.5 4.5H4.29C4.84 3.23 6.03 2.28 7.5 2.06V1C7.5 0.73 7.73 0.5 8 0.5ZM8 3C6.34 3 5 4.34 5 6C5 7.66 6.34 9 8 9C9.66 9 11 7.66 11 6C11 4.34 9.66 3 8 3ZM8 4.5C8.83 4.5 9.5 5.17 9.5 6C9.5 6.83 8.83 7.5 8 7.5C7.17 7.5 6.5 6.83 6.5 6C6.5 5.17 7.17 4.5 8 4.5ZM3 12C3.46 12 3.87 12.26 4.06 12.67L4.38 13.38L5.09 13.7C5.5 13.89 5.5 14.5 5.09 14.69L4.38 15.01L4.06 15.72C3.87 16.13 3.27 16.13 3.08 15.72L2.76 15.01L2.05 14.69C1.64 14.5 1.64 13.9 2.05 13.7L2.76 13.38L3.08 12.67C3.13 12.26 3.54 12 4 12ZM12.5 12C12.96 12 13.37 12.26 13.56 12.67L13.88 13.38L14.59 13.7C15 13.89 15 14.5 14.59 14.69L13.88 15.01L13.56 15.72C13.37 16.13 12.77 16.13 12.58 15.72L12.26 15.01L11.55 14.69C11.14 14.5 11.14 13.9 11.55 13.7L12.26 13.38L12.58 12.67C12.63 12.26 13.04 12 13.5 12Z" fill="currentColor"/></svg>
+          </button>
+
+          <!-- Dropdown filters (default) -->
+          <div class="toolbar-dropdowns" id="toolbarDropdowns">
+            <select class="filter-select" id="filterType" onchange="applyFilters()">
+              <option value="all">All Types</option>
+              <option value="Forecast">Forecast</option>
+              <option value="OC">Order Confirmation</option>
+              <option value="ASN">ASN</option>
+              <option value="Quality">Quality</option>
+            </select>
+            <select class="filter-select" id="filterSupplier" onchange="applyFilters()">
+              <option value="all">All Suppliers</option>
+              <option value="volterra">Volterra Components</option>
+              <option value="apex">Apex Precision</option>
+              <option value="global">Global Parts Ltd</option>
+              <option value="simco">Simco Electronics</option>
+              <option value="meridian">Meridian Fasteners</option>
+              <option value="crestline">Crestline Supply</option>
+              <option value="precision">Precision Metals</option>
+            </select>
+            <select class="filter-select" id="filterPriority" onchange="applyFilters()">
+              <option value="all">All Priorities</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="resolved">Resolved only</option>
+            </select>
+          </div>
+
+          <!-- NL filter bar (shown when AI mode active) -->
+          <div class="nl-filter-bar" id="nlFilterBar" style="position:relative;">
+            <div class="nl-input-wrap">
+              <span class="nl-star">✦</span>
+              <input class="nl-input" id="nlInput" placeholder="e.g. urgent Forecast from Volterra…"
+                oninput="onNlInput()" onkeydown="onNlKey(event)" autocomplete="off" />
+              <button class="nl-clear-btn" id="nlClearBtn" onclick="clearNlFilter()" title="Clear">✕</button>
+            </div>
+            <div class="nl-chips" id="nlChips"></div>
+            <div class="nl-thinking" id="nlThinking">
+              <span class="nl-dot"></span><span class="nl-dot"></span><span class="nl-dot"></span>
+            </div>
+            <!-- Suggestions dropdown -->
+            <div class="nl-suggestions" id="nlSuggestions">
+              <div class="nl-sug-item" onclick="applySuggestion('urgent Forecast')">
+                <span class="nl-sug-icon">✦</span> urgent Forecast
+                <span class="nl-sug-desc">2 results</span>
+              </div>
+              <div class="nl-sug-item" onclick="applySuggestion('Volterra')">
+                <span class="nl-sug-icon">✦</span> Volterra
+                <span class="nl-sug-desc">3 results</span>
+              </div>
+              <div class="nl-sug-item" onclick="applySuggestion('unresolved urgent')">
+                <span class="nl-sug-icon">✦</span> unresolved urgent
+                <span class="nl-sug-desc">2 results</span>
+              </div>
+              <div class="nl-sug-item" onclick="applySuggestion('ASN overdue')">
+                <span class="nl-sug-icon">✦</span> ASN overdue
+                <span class="nl-sug-desc">1 result</span>
+              </div>
+              <div class="nl-sug-item" onclick="applySuggestion('auto-resolved today')">
+                <span class="nl-sug-icon">✦</span> auto-resolved today
+                <span class="nl-sug-desc">4 results</span>
+              </div>
+            </div>
+          </div>
+
           <span class="filter-showing">Showing <strong id="filterShowCount">9</strong> of <strong>1,247</strong></span>
           <div class="view-toggle" style="margin-left:auto;">
             <button class="view-toggle-btn active" id="btnCardView" onclick="setView('card')" title="Card view">
@@ -1478,7 +1604,139 @@
     document.getElementById('agentBanner').classList.add('hidden');
   }
 
-  // ── View toggle ──────────────────────────────────────────────
+  // ── AI filter toggle ─────────────────────────────────────────
+  var aiFilterActive = false;
+
+  function toggleAiFilter() {
+    aiFilterActive = !aiFilterActive;
+    var btn       = document.getElementById('aiFilterBtn');
+    var dropdowns = document.getElementById('toolbarDropdowns');
+    var nlBar     = document.getElementById('nlFilterBar');
+
+    btn.classList.toggle('active', aiFilterActive);
+    dropdowns.classList.toggle('hidden', aiFilterActive);
+    nlBar.classList.toggle('visible', aiFilterActive);
+
+    if (aiFilterActive) {
+      document.getElementById('nlInput').focus();
+      document.getElementById('nlSuggestions').classList.add('visible');
+    } else {
+      clearNlFilter();
+      document.getElementById('nlSuggestions').classList.remove('visible');
+    }
+  }
+
+  // ── NL filter logic ──────────────────────────────────────────
+  // Maps keywords → filter values
+  var NL_RULES = [
+    { re: /\b(urgent)\b/i,             field: 'priority', val: 'urgent',   label: 'Urgent' },
+    { re: /\b(high)\b/i,               field: 'priority', val: 'high',     label: 'High' },
+    { re: /\b(auto.?resolv|resolved)\b/i, field: 'priority', val: 'resolved', label: 'Resolved' },
+    { re: /\b(forecast)\b/i,           field: 'type',     val: 'Forecast', label: 'Forecast' },
+    { re: /\b(asn|shipment|overdue)\b/i, field: 'type',   val: 'ASN',      label: 'ASN' },
+    { re: /\b(oc|order.?confirm|deviation)\b/i, field: 'type', val: 'OC', label: 'OC' },
+    { re: /\b(quality|hold)\b/i,       field: 'type',     val: 'Quality',  label: 'Quality' },
+    { re: /\b(volterra)\b/i,           field: 'supplier', val: 'volterra', label: 'Volterra' },
+    { re: /\b(apex)\b/i,               field: 'supplier', val: 'apex',     label: 'Apex Precision' },
+    { re: /\b(global)\b/i,             field: 'supplier', val: 'global',   label: 'Global Parts' },
+    { re: /\b(simco)\b/i,              field: 'supplier', val: 'simco',    label: 'Simco' },
+    { re: /\b(meridian)\b/i,           field: 'supplier', val: 'meridian', label: 'Meridian' },
+    { re: /\b(crestline)\b/i,          field: 'supplier', val: 'crestline',label: 'Crestline' },
+    { re: /\b(precision.?metals|precision)\b/i, field: 'supplier', val: 'precision', label: 'Precision Metals' },
+  ];
+
+  var nlActiveFilters = {};   // { type: 'Forecast', supplier: 'volterra', priority: 'urgent' }
+  var nlTypingTimer = null;
+
+  function onNlInput() {
+    var val = document.getElementById('nlInput').value;
+    document.getElementById('nlClearBtn').classList.toggle('visible', val.length > 0);
+    document.getElementById('nlSuggestions').classList.remove('visible');
+
+    clearTimeout(nlTypingTimer);
+    if (!val.trim()) { nlActiveFilters = {}; renderNlChips(); applyFilters(); return; }
+
+    // Show thinking dots after short pause, then parse
+    document.getElementById('nlThinking').classList.add('visible');
+    nlTypingTimer = setTimeout(function() {
+      document.getElementById('nlThinking').classList.remove('visible');
+      parseNl(val);
+    }, 520);
+  }
+
+  function onNlKey(e) {
+    if (e.key === 'Enter') {
+      clearTimeout(nlTypingTimer);
+      document.getElementById('nlThinking').classList.remove('visible');
+      parseNl(document.getElementById('nlInput').value);
+    }
+    if (e.key === 'Escape') {
+      document.getElementById('nlSuggestions').classList.remove('visible');
+    }
+  }
+
+  function parseNl(text) {
+    var found = {};
+    NL_RULES.forEach(function(rule) {
+      if (rule.re.test(text) && !found[rule.field]) {
+        found[rule.field] = { val: rule.val, label: rule.label };
+      }
+    });
+    nlActiveFilters = found;
+    renderNlChips();
+    applyFilters();
+  }
+
+  function applySuggestion(text) {
+    document.getElementById('nlInput').value = text;
+    document.getElementById('nlClearBtn').classList.add('visible');
+    document.getElementById('nlSuggestions').classList.remove('visible');
+    document.getElementById('nlThinking').classList.add('visible');
+    clearTimeout(nlTypingTimer);
+    nlTypingTimer = setTimeout(function() {
+      document.getElementById('nlThinking').classList.remove('visible');
+      parseNl(text);
+    }, 600);
+  }
+
+  function renderNlChips() {
+    var wrap = document.getElementById('nlChips');
+    wrap.innerHTML = '';
+    Object.keys(nlActiveFilters).forEach(function(field) {
+      var f = nlActiveFilters[field];
+      var chip = document.createElement('span');
+      chip.className = 'nl-chip';
+      chip.innerHTML = f.label + ' <span class="nl-chip-x" onclick="removeNlFilter(\'' + field + '\')">✕</span>';
+      wrap.appendChild(chip);
+    });
+  }
+
+  function removeNlFilter(field) {
+    delete nlActiveFilters[field];
+    renderNlChips();
+    applyFilters();
+    // Sync input text to remaining chips
+    var labels = Object.values(nlActiveFilters).map(function(f){ return f.label; });
+    document.getElementById('nlInput').value = labels.join(' ');
+    document.getElementById('nlClearBtn').classList.toggle('visible', labels.length > 0);
+  }
+
+  function clearNlFilter() {
+    nlActiveFilters = {};
+    document.getElementById('nlInput').value = '';
+    document.getElementById('nlClearBtn').classList.remove('visible');
+    document.getElementById('nlChips').innerHTML = '';
+    document.getElementById('nlSuggestions').classList.remove('visible');
+    document.getElementById('nlThinking').classList.remove('visible');
+    applyFilters();
+  }
+
+  // Close suggestions on outside click
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#nlFilterBar') && !e.target.closest('#aiFilterBtn')) {
+      document.getElementById('nlSuggestions').classList.remove('visible');
+    }
+  });
   var currentView = 'card';
   function setView(view) {
     currentView = view;
@@ -1512,9 +1770,17 @@
   }
 
   function applyFilters() {
-    var typeVal     = document.getElementById('filterType').value;
-    var supplierVal = document.getElementById('filterSupplier').value;
-    var priorityVal = document.getElementById('filterPriority').value;
+    // In AI mode use nlActiveFilters, else use dropdowns
+    var typeVal, supplierVal, priorityVal;
+    if (aiFilterActive) {
+      typeVal     = nlActiveFilters.type     ? nlActiveFilters.type.val     : 'all';
+      supplierVal = nlActiveFilters.supplier ? nlActiveFilters.supplier.val : 'all';
+      priorityVal = nlActiveFilters.priority ? nlActiveFilters.priority.val : 'all';
+    } else {
+      typeVal     = document.getElementById('filterType').value;
+      supplierVal = document.getElementById('filterSupplier').value;
+      priorityVal = document.getElementById('filterPriority').value;
+    }
 
     var shown = 0;
 
