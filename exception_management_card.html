@@ -380,6 +380,27 @@
     .badge-high   { background: #fff4ec; color: var(--high); }
     .badge-info   { background: var(--info-bg); color: var(--info); }
     .badge-done   { background: #e8f7ee !important; color: var(--positive) !important; }
+    .badge-auto   { background: #e8f7ee; color: var(--positive); }
+    .exc-card.auto-card { border-left-color: var(--positive); opacity: 0.85; }
+
+    /* ── Resolve animation ───────────────────────────────────── */
+    @keyframes resolveOut {
+      0%   { opacity: 1; transform: translateY(0) scale(1); max-height: 200px; }
+      40%  { opacity: 0.6; transform: translateY(-6px) scale(0.98); }
+      70%  { opacity: 0; transform: translateY(0) scale(0.96); max-height: 200px; }
+      100% { opacity: 0; transform: translateY(0); max-height: 0; margin: 0; padding: 0; }
+    }
+    .exc-card.resolving {
+      animation: resolveOut 0.55s ease forwards;
+      pointer-events: none; overflow: hidden;
+    }
+    @keyframes resolveIn {
+      0%   { opacity: 0; transform: translateY(12px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .exc-card.resolve-in {
+      animation: resolveIn 0.4s ease forwards;
+    }
     .exc-conf {
       font-size: 10px; color: var(--label); text-align: center;
       line-height: 1.2;
@@ -960,64 +981,121 @@
           </div>
         </div>
 
-        <!-- Card 6 — OC aging Global Parts (Info) -->
-        <div class="exc-card info-card" id="exc6">
+        <!-- Section divider — Auto-resolved -->
+        <div id="auto-resolved-divider" style="display:flex;align-items:center;gap:10px;padding:8px 0 4px;color:var(--positive);font-size:12px;font-weight:600;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#256f3a" stroke-width="1.5"/><path d="M5 8l2.5 2.5L11 5.5" stroke="#256f3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          RESOLVED TODAY (<span id="auto-resolved-count">4</span>) — No action needed
+          <div style="flex:1;height:1px;background:#b8dfc7;"></div>
+        </div>
+
+        <!-- Card 6 — AUTO-RESOLVED: OC in-tolerance batch, Global Parts -->
+        <div class="exc-card auto-card" id="exc6">
           <div class="exc-badge-col">
-            <span class="exc-badge badge-info" id="badge6">Info</span>
+            <span class="exc-badge badge-auto" id="badge6">Auto-resolved</span>
             <span class="exc-type-tag">OC</span>
-            <span class="exc-conf">88%</span>
+            <span class="exc-conf">96%</span>
           </div>
           <div class="exc-card-body">
-            <div class="exc-title">6 aged OC deviations from Global Parts — all in tolerance, SLA breached</div>
+            <div class="exc-title">6 OC deviations auto-approved — Global Parts, all within ±4% tolerance</div>
             <div class="exc-signals">
-              <span class="sig-chip warn"><span class="sig-chip-label">Oldest</span>14 days · PO-4500002003</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">All</span>within ±4%</span>
-              <span class="sig-chip neutral"><span class="sig-chip-label">Pattern</span>3rd cycle breach</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Auto-rule</span>saves ~25 min/cycle</span>
+              <span class="sig-chip ok"><span class="sig-chip-label">Rule</span>In-tolerance auto-approve</span>
+              <span class="sig-chip ok"><span class="sig-chip-label">Saved</span>~25 min · Mar 27, 09:14</span>
+              <span class="sig-chip neutral"><span class="sig-chip-label">POs</span>4500002003–2008</span>
             </div>
             <div class="exc-meta-row">
-              <span class="exc-meta-pill">Global Parts Ltd</span>
+              <span class="exc-meta-pill">Global Parts Ltd · #5021</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 13, 2026</span>
+              <span class="exc-meta-pill">Plant US01</span>
             </div>
           </div>
           <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta6" onclick="acceptCard('exc6')">Approve All 6</button>
+            <button class="exc-btn-cta" id="cta6" onclick="viewResolution('exc6')">View Resolution</button>
             <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
-              <button class="exc-btn-dismiss" onclick="dismissCard('exc6')">Dismiss</button>
+              <button class="exc-btn-dismiss" onclick="undoResolution('exc6')">Undo</button>
             </div>
           </div>
         </div>
 
-        <!-- Card 7 — ASN missing Simco (Info) -->
-        <div class="exc-card info-card" id="exc7">
+        <!-- Card 7 — AUTO-RESOLVED: ASN overdue alert sent, Simco -->
+        <div class="exc-card auto-card" id="exc7">
           <div class="exc-badge-col">
-            <span class="exc-badge badge-info" id="badge7">Info</span>
+            <span class="exc-badge badge-auto" id="badge7">Auto-resolved</span>
             <span class="exc-type-tag">ASN</span>
-            <span class="exc-conf">85%</span>
+            <span class="exc-conf">91%</span>
           </div>
           <div class="exc-card-body">
-            <div class="exc-title">2 Simco ASNs 1 day overdue — alert sent, low risk</div>
+            <div class="exc-title">2 Simco ASNs 1 day overdue — expedite alert auto-sent, low risk</div>
             <div class="exc-signals">
-              <span class="sig-chip warn"><span class="sig-chip-label">Overdue</span>Mar 26 · 2 POs</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Risk</span>Low · 92% on-time rate</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Agent</span>Alert sent 08:14</span>
-              <span class="sig-chip neutral"><span class="sig-chip-label">Units</span>430 total</span>
+              <span class="sig-chip ok"><span class="sig-chip-label">Action</span>Alert sent 08:14</span>
+              <span class="sig-chip ok"><span class="sig-chip-label">Risk</span>Low · 92% on-time history</span>
+              <span class="sig-chip neutral"><span class="sig-chip-label">Units</span>430 · PO-4500003021–3022</span>
             </div>
             <div class="exc-meta-row">
-              <span class="exc-meta-pill">Simco Electronics</span>
+              <span class="exc-meta-pill">Simco Electronics · #5033</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">PO-4500003021 · PO-4500003022</span>
-              <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 27, 2026</span>
+              <span class="exc-meta-pill">Plant US04</span>
             </div>
           </div>
           <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta7" onclick="acceptCard('exc7')">Acknowledge</button>
+            <button class="exc-btn-cta" id="cta7" onclick="viewResolution('exc7')">View Resolution</button>
             <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
-              <button class="exc-btn-dismiss" onclick="dismissCard('exc7')">Dismiss</button>
+              <button class="exc-btn-dismiss" onclick="undoResolution('exc7')">Undo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 8 — AUTO-RESOLVED: Forecast minor gap, Meridian Fasteners -->
+        <div class="exc-card auto-card" id="exc8">
+          <div class="exc-badge-col">
+            <span class="exc-badge badge-auto" id="badge8">Auto-resolved</span>
+            <span class="exc-type-tag">Forecast</span>
+            <span class="exc-conf">93%</span>
+          </div>
+          <div class="exc-card-body">
+            <div class="exc-title">Forecast gap resolved via safety stock — Meridian Fasteners, Wk 5 shortfall covered</div>
+            <div class="exc-signals">
+              <span class="sig-chip ok"><span class="sig-chip-label">Rule</span>Safety stock coverage</span>
+              <span class="sig-chip ok"><span class="sig-chip-label">Saved</span>~18 min · Mar 27, 07:52</span>
+              <span class="sig-chip neutral"><span class="sig-chip-label">Gap</span>40 units · Wk 5</span>
+            </div>
+            <div class="exc-meta-row">
+              <span class="exc-meta-pill">Meridian Fasteners · #5041</span>
+              <span class="exc-meta-sep">·</span>
+              <span class="exc-meta-pill">Plant US02</span>
+            </div>
+          </div>
+          <div class="exc-card-actions">
+            <button class="exc-btn-cta" id="cta8" onclick="viewResolution('exc8')">View Resolution</button>
+            <div class="exc-card-sec-actions">
+              <button class="exc-btn-dismiss" onclick="undoResolution('exc8')">Undo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 9 — AUTO-RESOLVED: Duplicate OC deviation, Crestline -->
+        <div class="exc-card auto-card" id="exc9">
+          <div class="exc-badge-col">
+            <span class="exc-badge badge-auto" id="badge9">Auto-resolved</span>
+            <span class="exc-type-tag">OC</span>
+            <span class="exc-conf">98%</span>
+          </div>
+          <div class="exc-card-body">
+            <div class="exc-title">Duplicate OC deviation dismissed — Crestline Supply, re-submission identified by agent</div>
+            <div class="exc-signals">
+              <span class="sig-chip ok"><span class="sig-chip-label">Rule</span>Duplicate detection</span>
+              <span class="sig-chip ok"><span class="sig-chip-label">Saved</span>~12 min · Mar 26, 16:44</span>
+              <span class="sig-chip neutral"><span class="sig-chip-label">Ref</span>PO-4500004110</span>
+            </div>
+            <div class="exc-meta-row">
+              <span class="exc-meta-pill">Crestline Supply Co · #5057</span>
+              <span class="exc-meta-sep">·</span>
+              <span class="exc-meta-pill">Plant US03</span>
+            </div>
+          </div>
+          <div class="exc-card-actions">
+            <button class="exc-btn-cta" id="cta9" onclick="viewResolution('exc9')">View Resolution</button>
+            <div class="exc-card-sec-actions">
+              <button class="exc-btn-dismiss" onclick="undoResolution('exc9')">Undo</button>
             </div>
           </div>
         </div>
@@ -1028,16 +1106,162 @@
 </div><!-- /app-body -->
 
 <script>
+  // KPI state — tracks counts for active (needs-decision) cards
+  var kpiState = {
+    urgent: 2,    // currently active urgent cards (exc1, exc2)
+    decision: 3,  // currently active needs-decision cards (exc3, exc4, exc5)
+    auto: 4       // auto-resolved count
+  };
+
+  // Priority of each active card: 'urgent' or 'decision'
+  var cardPriority = { exc1: 'urgent', exc2: 'urgent', exc3: 'decision', exc4: 'decision', exc5: 'decision' };
+
+  // Titles for resolved cards (to clone into the resolved section)
+  var cardLabels = {
+    exc1: { title: 'Forecast shortage accepted — Volterra · Plant US01', type: 'Forecast', conf: '94%' },
+    exc2: { title: 'Expedite request sent — Apex Precision · Plant US03', type: 'ASN', conf: '89%' },
+    exc3: { title: 'OC batch approved (24) — Volterra · Plant US01', type: 'OC', conf: '97%' },
+    exc4: { title: 'Quality hold disposition requested — Precision Metals · Plant US01', type: 'Quality', conf: '86%' },
+    exc5: { title: 'Monitor acknowledged — Volterra US02 Dallas', type: 'Forecast', conf: '82%' }
+  };
+
+  function updateKpi() {
+    var needsDecision = kpiState.decision;
+    document.getElementById('kpiUrgentNew').textContent = kpiState.urgent;
+    document.getElementById('kpiDecisionNew').textContent = needsDecision;
+    document.getElementById('kpiAutoNew').textContent = kpiState.auto;
+    document.getElementById('kpiTotalNew').textContent = kpiState.urgent + needsDecision + kpiState.auto;
+    document.getElementById('auto-resolved-count').textContent = kpiState.auto;
+  }
+
   function acceptCard(id) {
-    var badge = document.getElementById('badge' + id.replace('exc',''));
-    if (badge) { badge.className = 'exc-badge badge-done'; badge.textContent = 'Accepted'; }
-    var cta = document.getElementById('cta' + id.replace('exc',''));
-    if (cta) { cta.textContent = '✓ Done'; cta.classList.add('accepted'); cta.disabled = true; }
+    var card = document.getElementById(id);
+    if (!card || card.classList.contains('resolving')) return;
+
+    // Update badge + button immediately
+    var n = id.replace('exc', '');
+    var badge = document.getElementById('badge' + n);
+    var actionsEl = card.querySelector('.exc-card-actions');
+
+    if (badge) { badge.className = 'exc-badge badge-auto'; badge.textContent = 'Resolved'; }
+    if (actionsEl) {
+      actionsEl.innerHTML =
+        '<button class="exc-btn-cta accepted" disabled>✓ Resolved</button>' +
+        '<div class="exc-card-sec-actions">' +
+        '<button class="exc-btn-dismiss" onclick="undoResolution(\'' + id + '\')">Undo</button>' +
+        '</div>';
+    }
+
+    // Update KPI counters
+    var priority = cardPriority[id] || 'decision';
+    if (priority === 'urgent') kpiState.urgent = Math.max(0, kpiState.urgent - 1);
+    else kpiState.decision = Math.max(0, kpiState.decision - 1);
+    kpiState.auto += 1;
+    updateKpi();
+
+    // Animate card out, then move it into resolved section
+    card.classList.add('resolving');
+    card.addEventListener('animationend', function onEnd() {
+      card.removeEventListener('animationend', onEnd);
+      card.classList.remove('resolving');
+
+      // Clone card as auto-resolved entry
+      var label = cardLabels[id] || { title: 'Exception resolved', type: 'OC', conf: '90%' };
+      var resolvedCard = document.createElement('div');
+      resolvedCard.className = 'exc-card auto-card resolve-in';
+      resolvedCard.id = id + '-resolved';
+      resolvedCard.innerHTML =
+        '<div class="exc-badge-col">' +
+          '<span class="exc-badge badge-auto">Resolved</span>' +
+          '<span class="exc-type-tag">' + label.type + '</span>' +
+          '<span class="exc-conf">' + label.conf + '</span>' +
+        '</div>' +
+        '<div class="exc-card-body">' +
+          '<div class="exc-title">' + label.title + '</div>' +
+          '<div class="exc-signals">' +
+            '<span class="sig-chip ok"><span class="sig-chip-label">Action</span>Accepted by you</span>' +
+            '<span class="sig-chip ok"><span class="sig-chip-label">Time</span>' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="exc-card-actions">' +
+          '<button class="exc-btn-cta" onclick="viewResolution(\'' + id + '-resolved\')">View Resolution</button>' +
+          '<div class="exc-card-sec-actions">' +
+            '<button class="exc-btn-dismiss" onclick="undoAccept(\'' + id + '\')">Undo</button>' +
+          '</div>' +
+        '</div>';
+
+      // Hide original, insert resolved card after the divider section
+      card.style.display = 'none';
+      var divider = document.getElementById('auto-resolved-divider');
+      divider.insertAdjacentElement('afterend', resolvedCard);
+    }, { once: true });
   }
 
   function dismissCard(id) {
     var card = document.getElementById(id);
     if (card) card.classList.add('dismissed');
+  }
+
+  function viewResolution(id) {
+    var card = document.getElementById(id);
+    if (!card) return;
+    var cta = card.querySelector('.exc-btn-cta');
+    if (cta) { cta.textContent = '✓ Viewed'; cta.classList.add('accepted'); cta.disabled = true; }
+  }
+
+  function undoResolution(id) {
+    var card = document.getElementById(id);
+    if (card) card.classList.add('dismissed');
+  }
+
+  function undoAccept(origId) {
+    var resolved = document.getElementById(origId + '-resolved');
+    var orig = document.getElementById(origId);
+    if (!resolved || !orig) return;
+
+    // Restore badge + actions on original card before showing it
+    var n = origId.replace('exc', '');
+    var badge = document.getElementById('badge' + n);
+    var ctaLabels = { exc1:'Accept &amp; Send', exc2:'Send Expedite Request', exc3:'Batch Approve 24', exc4:'Request Disposition', exc5:'Acknowledge' };
+    if (badge) { badge.className = 'exc-badge badge-' + (cardPriority[origId] === 'urgent' ? 'urgent' : 'high'); badge.textContent = cardPriority[origId] === 'urgent' ? 'Urgent' : 'High'; }
+    var actionsEl = orig.querySelector('.exc-card-actions');
+    if (actionsEl) {
+      var href = origId === 'exc1' ? '?exc=1' : origId === 'exc2' ? '?exc=2' : origId === 'exc3' ? '?exc=3' : '';
+      actionsEl.innerHTML =
+        '<button class="exc-btn-cta" id="cta' + n + '" onclick="acceptCard(\'' + origId + '\')">' + (ctaLabels[origId] || 'Accept') + '</button>' +
+        '<div class="exc-card-sec-actions">' +
+        '<a class="exc-btn-modify" href="exception_detail.html' + href + '">Modify</a>' +
+        '<button class="exc-btn-dismiss" onclick="dismissCard(\'' + origId + '\')">Dismiss</button>' +
+        '</div>';
+    }
+
+    // Restore KPI
+    var priority = cardPriority[origId] || 'decision';
+    if (priority === 'urgent') kpiState.urgent += 1;
+    else kpiState.decision += 1;
+    kpiState.auto = Math.max(4, kpiState.auto - 1);
+    updateKpi();
+
+    // Animate resolved card out, then show original with slide-in
+    resolved.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    resolved.style.opacity = '0';
+    resolved.style.transform = 'translateY(-8px) scale(0.97)';
+    setTimeout(function() {
+      resolved.remove();
+      orig.style.display = '';
+      orig.style.opacity = '0';
+      orig.style.transform = 'translateY(12px) scale(0.97)';
+      orig.style.transition = 'none';
+      void orig.offsetHeight;
+      orig.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+      orig.style.opacity = '1';
+      orig.style.transform = 'translateY(0) scale(1)';
+      setTimeout(function() {
+        orig.style.transition = '';
+        orig.style.transform = '';
+        orig.style.opacity = '';
+      }, 380);
+    }, 320);
   }
 
   function dismissBanner() {
