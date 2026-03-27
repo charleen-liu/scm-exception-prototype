@@ -287,29 +287,55 @@
     }
     .btn-primary:hover { background: #0057c2; }
 
-    /* ── KPI Bar ─────────────────────────────────────────────── */
+    /* ── KPI Cards ───────────────────────────────────────────── */
     .kpi-bar {
-      display: flex; gap: 0;
+      display: flex; gap: 12px;
       border-top: 1px solid var(--border);
       margin: 0 -32px;
-      padding: 0 32px;
+      padding: 16px 32px;
+      background: var(--page-bg);
     }
     .kpi-item {
-      flex: 1; padding: 12px 0;
-      border-right: 1px solid var(--border);
+      flex: 1; padding: 14px 18px;
+      background: #fff;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      border-top: 3px solid transparent;
       cursor: pointer;
+      transition: box-shadow .15s;
+      display: flex; flex-direction: column; gap: 6px;
     }
-    .kpi-item:last-child { border-right: none; }
-    .kpi-item.active { border-bottom: 2px solid var(--brand); }
+    .kpi-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .kpi-item.active { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    .kpi-item.kpi-urgent  { border-top-color: var(--urgent); }
+    .kpi-item.kpi-decision{ border-top-color: #e07b00; }
+    .kpi-item.kpi-auto    { border-top-color: var(--positive); }
+    .kpi-item.kpi-all     { border-top-color: var(--brand); }
     .kpi-label {
-      font-size: 12px; color: var(--label);
-      margin-bottom: 2px;
+      font-size: 12px; font-weight: 600; color: var(--label);
+      text-transform: uppercase; letter-spacing: .4px;
     }
-    .kpi-value {
-      font-size: 28px; font-weight: 400; color: var(--title);
+    .kpi-fraction {
+      display: flex; align-items: baseline; gap: 2px;
       line-height: 1;
     }
-    .kpi-value.urgent { color: var(--urgent); }
+    .kpi-new {
+      font-size: 32px; font-weight: 300; color: var(--title);
+    }
+    .kpi-item.kpi-urgent  .kpi-new { color: var(--urgent); }
+    .kpi-item.kpi-decision .kpi-new { color: #e07b00; }
+    .kpi-item.kpi-auto    .kpi-new { color: var(--positive); }
+    .kpi-sep {
+      font-size: 22px; font-weight: 300; color: var(--border-mid);
+      margin: 0 1px;
+    }
+    .kpi-total {
+      font-size: 22px; font-weight: 300; color: var(--label);
+    }
+    .kpi-since {
+      font-size: 11px; color: var(--label);
+    }
+    .kpi-since strong { color: var(--title); font-weight: 600; }
 
     /* ── Content Area ─────────────────────────────────────────── */
     .content-area {
@@ -692,23 +718,43 @@
         </div>
       </div>
 
-      <!-- KPI Bar -->
+      <!-- KPI Cards -->
       <div class="kpi-bar">
-        <div class="kpi-item" onclick="filterBy('all')">
-          <div class="kpi-label">Total Exceptions</div>
-          <div class="kpi-value" id="kpiTotal">12</div>
-        </div>
-        <div class="kpi-item" onclick="filterBy('urgent')">
+        <div class="kpi-item kpi-urgent" onclick="filterBy('urgent')">
           <div class="kpi-label">Urgent</div>
-          <div class="kpi-value urgent" id="kpiUrgent">3</div>
+          <div class="kpi-fraction">
+            <span class="kpi-new" id="kpiUrgentNew">2</span>
+            <span class="kpi-sep">/</span>
+            <span class="kpi-total" id="kpiUrgent">3</span>
+          </div>
+          <div class="kpi-since"><strong>2 new</strong> since last update</div>
         </div>
-        <div class="kpi-item" onclick="filterBy('decision')">
-          <div class="kpi-label">Needs decision</div>
-          <div class="kpi-value" id="kpiDecision">5</div>
+        <div class="kpi-item kpi-decision" onclick="filterBy('decision')">
+          <div class="kpi-label">Needs Decision</div>
+          <div class="kpi-fraction">
+            <span class="kpi-new" id="kpiDecisionNew">3</span>
+            <span class="kpi-sep">/</span>
+            <span class="kpi-total" id="kpiDecision">5</span>
+          </div>
+          <div class="kpi-since"><strong>3 new</strong> since last update</div>
         </div>
-        <div class="kpi-item" onclick="filterBy('auto')">
-          <div class="kpi-label">Auto-resolvable</div>
-          <div class="kpi-value" id="kpiAuto">22</div>
+        <div class="kpi-item kpi-auto" onclick="filterBy('auto')">
+          <div class="kpi-label">Auto-Resolved</div>
+          <div class="kpi-fraction">
+            <span class="kpi-new" id="kpiAutoNew">4</span>
+            <span class="kpi-sep">/</span>
+            <span class="kpi-total" id="kpiAuto">22</span>
+          </div>
+          <div class="kpi-since"><strong>4 new</strong> since last update</div>
+        </div>
+        <div class="kpi-item kpi-all" onclick="filterBy('all')">
+          <div class="kpi-label">All Exceptions</div>
+          <div class="kpi-fraction">
+            <span class="kpi-new" id="kpiTotalNew">9</span>
+            <span class="kpi-sep">/</span>
+            <span class="kpi-total" id="kpiTotal">30</span>
+          </div>
+          <div class="kpi-since"><strong>9 new</strong> since last update</div>
         </div>
       </div>
     </div><!-- /page-header -->
