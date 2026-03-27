@@ -569,6 +569,90 @@
     }
     .filter-showing strong { color: var(--title); font-weight: 600; }
 
+    /* ── View toggle ──────────────────────────────────────────── */
+    .view-toggle {
+      display: flex; align-items: center; gap: 0;
+      border: 1px solid var(--border-mid); border-radius: var(--radius-sm);
+      overflow: hidden; flex-shrink: 0; margin-left: 8px;
+    }
+    .view-toggle-btn {
+      background: #fff; border: none; cursor: pointer;
+      padding: 0 10px; height: 28px;
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--label);
+      font-family: inherit;
+      border-right: 1px solid var(--border-mid);
+      transition: background .12s, color .12s;
+    }
+    .view-toggle-btn:last-child { border-right: none; }
+    .view-toggle-btn:hover { background: #f5f6f7; }
+    .view-toggle-btn.active { background: var(--brand); color: #fff; }
+
+    /* ── Table view ───────────────────────────────────────────── */
+    .exc-table-view { display: none; }
+    .exc-table-view.visible { display: block; }
+    .exc-list.hidden { display: none; }
+
+    .tbl-view {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px;
+      background: #fff;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .tbl-view thead th {
+      background: #f5f6f7;
+      border-bottom: 1px solid var(--border-mid);
+      padding: 9px 12px;
+      text-align: left;
+      font-size: 11px; font-weight: 700;
+      color: var(--label);
+      text-transform: uppercase; letter-spacing: .4px;
+      white-space: nowrap;
+      position: sticky; top: 0; z-index: 1;
+    }
+    .tbl-view thead th:first-child { width: 90px; }
+    .tbl-view tbody tr {
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .tbl-view tbody tr:last-child { border-bottom: none; }
+    .tbl-view tbody tr:hover { background: #f8f9fa; }
+    .tbl-view tbody tr.tbl-row-resolved { opacity: 0.7; }
+    .tbl-view tbody tr.tbl-row-hidden {
+      display: none;
+    }
+    .tbl-view td {
+      padding: 9px 12px; vertical-align: middle;
+    }
+    .tbl-priority-col { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+    .tbl-type { font-size: 10px; font-weight: 600; color: var(--label); }
+    .tbl-conf { font-size: 10px; color: var(--label); }
+    .tbl-title { font-weight: 500; color: var(--title); line-height: 1.35; }
+    .tbl-meta  { font-size: 11px; color: var(--label); margin-top: 2px; }
+    .tbl-cost  { font-weight: 600; color: var(--urgent); white-space: nowrap; }
+    .tbl-cost.ok { color: var(--positive); }
+    .tbl-date  { font-size: 12px; color: var(--label); white-space: nowrap; }
+    .tbl-action-btn {
+      font-size: 12px; padding: 4px 10px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-mid); background: #fff;
+      cursor: pointer; white-space: nowrap; color: var(--title);
+      font-family: inherit;
+    }
+    .tbl-action-btn:hover { background: #f5f6f7; }
+    .tbl-action-btn.primary { background: var(--title); color: #fff; border-color: var(--title); }
+    .tbl-action-btn.primary:hover { background: #2c3e50; }
+    .tbl-action-btn.done { background: #e8f7ee; color: var(--positive); border-color: #b8dfc7; cursor: default; }
+    .tbl-divider-row td {
+      background: #f5f6f7;
+      padding: 6px 12px;
+      font-size: 11px; font-weight: 700;
+      color: var(--positive);
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+
   </style>
 </head>
 <body>
@@ -813,6 +897,16 @@
             <option value="resolved">Resolved only</option>
           </select>
           <span class="filter-showing">Showing <strong id="filterShowCount">9</strong> of <strong>1,247</strong></span>
+          <div class="view-toggle" style="margin-left:auto;">
+            <button class="view-toggle-btn active" id="btnCardView" onclick="setView('card')" title="Card view">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor"/></svg>
+              Cards
+            </button>
+            <button class="view-toggle-btn" id="btnTableView" onclick="setView('table')" title="Table view">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="3" rx="1" fill="currentColor"/><rect x="1" y="6" width="14" height="3" rx="1" fill="currentColor"/><rect x="1" y="11" width="14" height="3" rx="1" fill="currentColor"/></svg>
+              Table
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1118,6 +1212,105 @@
         </div>
 
       </div><!-- /exc-list -->
+
+    <!-- TABLE VIEW (hidden by default) -->
+    <div class="exc-table-view" id="excTableView">
+      <table class="tbl-view" id="tblView">
+        <thead>
+          <tr>
+            <th>Priority</th>
+            <th>Exception</th>
+            <th>Supplier · Plant</th>
+            <th>Impact</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Active exceptions -->
+          <tr class="tbl-row-active" data-type="Forecast" data-supplier="volterra" data-priority="urgent" data-id="exc1">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-urgent">Urgent</span><span class="tbl-type">Forecast</span><span class="tbl-conf">96%</span></div></td>
+            <td><div class="tbl-title">Volterra Components shortage — Plant US01 at risk · Wks 4 &amp; 6</div><div class="tbl-meta">Trail: 100% → 60% OC → 45% ASN · Raw material shortage</div></td>
+            <td><div class="tbl-meta">Volterra Components GmbH · #5000</div><div class="tbl-meta">Plant US01 (Chicago)</div></td>
+            <td><span class="tbl-cost">$1,255,930</span></td>
+            <td><span class="tbl-date">Mar 24</span></td>
+            <td><button class="tbl-action-btn primary" id="tblcta1" onclick="tblAccept('exc1','tblcta1')">Accept &amp; Send</button></td>
+          </tr>
+          <tr class="tbl-row-active" data-type="ASN" data-supplier="apex" data-priority="urgent" data-id="exc2">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-urgent">Urgent</span><span class="tbl-type">ASN</span><span class="tbl-conf">99%</span></div></td>
+            <td><div class="tbl-title">Apex Precision missed hard ship date — Apr 1 line stoppage risk</div><div class="tbl-meta">520 units not shipped · Overdue Mar 24 · Alt source: Meridian 14d</div></td>
+            <td><div class="tbl-meta">Apex Precision</div><div class="tbl-meta">Plant US03 (Austin)</div></td>
+            <td><span class="tbl-cost">$843,200</span></td>
+            <td><span class="tbl-date">Mar 25</span></td>
+            <td><button class="tbl-action-btn primary" id="tblcta2" onclick="tblAccept('exc2','tblcta2')">Expedite Request</button></td>
+          </tr>
+          <tr class="tbl-row-active" data-type="OC" data-supplier="volterra" data-priority="high" data-id="exc3">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-high">High</span><span class="tbl-type">OC</span><span class="tbl-conf">94%</span></div></td>
+            <td><div class="tbl-title">27 OC deviations from Volterra — 24 batch-ready · 3 flagged</div><div class="tbl-meta">Flagged: –15%, –20%, +10% · Oldest 14 days pending</div></td>
+            <td><div class="tbl-meta">Volterra Components</div><div class="tbl-meta">Plant US01</div></td>
+            <td><span class="tbl-cost" style="color:var(--high);">27 POs</span></td>
+            <td><span class="tbl-date">Mar 24</span></td>
+            <td><button class="tbl-action-btn primary" id="tblcta3" onclick="tblAccept('exc3','tblcta3')">Batch Approve 24</button></td>
+          </tr>
+          <tr class="tbl-row-active" data-type="Quality" data-supplier="precision" data-priority="high" data-id="exc4">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-high">High</span><span class="tbl-type">Quality</span><span class="tbl-conf">93%</span></div></td>
+            <td><div class="tbl-title">Precision Metals on quality hold — 340 units blocked at Plant US01</div><div class="tbl-meta">Surface finish non-conformance · Line risk if not cleared by Apr 2</div></td>
+            <td><div class="tbl-meta">Precision Metals</div><div class="tbl-meta">Plant US01 (Chicago)</div></td>
+            <td><span class="tbl-cost" style="color:var(--high);">340 units</span></td>
+            <td><span class="tbl-date">Mar 26</span></td>
+            <td><button class="tbl-action-btn primary" id="tblcta4" onclick="tblAccept('exc4','tblcta4')">Request Disposition</button></td>
+          </tr>
+          <tr class="tbl-row-active" data-type="Forecast" data-supplier="volterra" data-priority="high" data-id="exc5">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-high">High</span><span class="tbl-type">Forecast</span><span class="tbl-conf">91%</span></div></td>
+            <td><div class="tbl-title">Plant US02 at 80% commit · Wk 6 — flex capacity for US01 shortfall</div><div class="tbl-meta">No OC deviations · ASN on track · Available for inter-plant transfer</div></td>
+            <td><div class="tbl-meta">Volterra Components GmbH · #5000</div><div class="tbl-meta">Plant US02 (Dallas)</div></td>
+            <td><span class="tbl-cost ok">Monitor</span></td>
+            <td><span class="tbl-date">Mar 24</span></td>
+            <td><button class="tbl-action-btn primary" id="tblcta5" onclick="tblAccept('exc5','tblcta5')">Acknowledge</button></td>
+          </tr>
+          <!-- Divider row -->
+          <tr class="tbl-divider-row" id="tbl-resolved-divider">
+            <td colspan="6">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-right:6px;"><circle cx="8" cy="8" r="7" stroke="#256f3a" stroke-width="1.5"/><path d="M5 8l2.5 2.5L11 5.5" stroke="#256f3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              RESOLVED TODAY (<span id="tbl-resolved-count">4</span>) — No action needed
+            </td>
+          </tr>
+          <!-- Auto-resolved rows -->
+          <tr class="tbl-row-resolved" data-type="OC" data-supplier="global" data-priority="resolved">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-auto">Auto-resolved</span><span class="tbl-type">OC</span><span class="tbl-conf">96%</span></div></td>
+            <td><div class="tbl-title">6 OC deviations auto-approved — Global Parts, all within ±4%</div><div class="tbl-meta">Rule: In-tolerance auto-approve · Saved ~25 min</div></td>
+            <td><div class="tbl-meta">Global Parts Ltd · #5021</div><div class="tbl-meta">Plant US01</div></td>
+            <td><span class="tbl-cost ok">—</span></td>
+            <td><span class="tbl-date">09:14</span></td>
+            <td><button class="tbl-action-btn done">✓ Auto-resolved</button></td>
+          </tr>
+          <tr class="tbl-row-resolved" data-type="ASN" data-supplier="simco" data-priority="resolved">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-auto">Auto-resolved</span><span class="tbl-type">ASN</span><span class="tbl-conf">91%</span></div></td>
+            <td><div class="tbl-title">2 Simco ASNs 1 day overdue — expedite alert auto-sent, low risk</div><div class="tbl-meta">92% on-time history · 430 units · PO-4500003021–3022</div></td>
+            <td><div class="tbl-meta">Simco Electronics · #5033</div><div class="tbl-meta">Plant US04</div></td>
+            <td><span class="tbl-cost ok">—</span></td>
+            <td><span class="tbl-date">08:14</span></td>
+            <td><button class="tbl-action-btn done">✓ Auto-resolved</button></td>
+          </tr>
+          <tr class="tbl-row-resolved" data-type="Forecast" data-supplier="meridian" data-priority="resolved">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-auto">Auto-resolved</span><span class="tbl-type">Forecast</span><span class="tbl-conf">93%</span></div></td>
+            <td><div class="tbl-title">Forecast gap resolved via safety stock — Meridian Fasteners, Wk 5</div><div class="tbl-meta">Safety stock coverage · 40 units · Saved ~18 min</div></td>
+            <td><div class="tbl-meta">Meridian Fasteners · #5041</div><div class="tbl-meta">Plant US02</div></td>
+            <td><span class="tbl-cost ok">—</span></td>
+            <td><span class="tbl-date">07:52</span></td>
+            <td><button class="tbl-action-btn done">✓ Auto-resolved</button></td>
+          </tr>
+          <tr class="tbl-row-resolved" data-type="OC" data-supplier="crestline" data-priority="resolved">
+            <td><div class="tbl-priority-col"><span class="exc-badge badge-auto">Auto-resolved</span><span class="tbl-type">OC</span><span class="tbl-conf">98%</span></div></td>
+            <td><div class="tbl-title">Duplicate OC deviation dismissed — Crestline Supply re-submission</div><div class="tbl-meta">Duplicate detection rule · PO-4500004110 · Saved ~12 min</div></td>
+            <td><div class="tbl-meta">Crestline Supply Co · #5057</div><div class="tbl-meta">Plant US03</div></td>
+            <td><span class="tbl-cost ok">—</span></td>
+            <td><span class="tbl-date">Mar 26</span></td>
+            <td><button class="tbl-action-btn done">✓ Auto-resolved</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div><!-- /exc-table-view -->
     </div><!-- /content-area -->
   </div><!-- /main -->
 </div><!-- /app-body -->
@@ -1285,23 +1478,51 @@
     document.getElementById('agentBanner').classList.add('hidden');
   }
 
+  // ── View toggle ──────────────────────────────────────────────
+  var currentView = 'card';
+  function setView(view) {
+    currentView = view;
+    var cardList  = document.getElementById('excList');
+    var tableView = document.getElementById('excTableView');
+    var btnCard   = document.getElementById('btnCardView');
+    var btnTable  = document.getElementById('btnTableView');
+    if (view === 'card') {
+      cardList.classList.remove('hidden');
+      tableView.classList.remove('visible');
+      btnCard.classList.add('active');
+      btnTable.classList.remove('active');
+    } else {
+      cardList.classList.add('hidden');
+      tableView.classList.add('visible');
+      btnCard.classList.remove('active');
+      btnTable.classList.add('active');
+    }
+    applyFilters();
+  }
+
+  // ── Table-view accept ────────────────────────────────────────
+  function tblAccept(cardId, btnId) {
+    var btn = document.getElementById(btnId);
+    if (!btn || btn.disabled) return;
+    btn.textContent = '✓ Resolved';
+    btn.className = 'tbl-action-btn done';
+    btn.disabled = true;
+    // Keep card view in sync
+    acceptCard(cardId);
+  }
+
   function applyFilters() {
     var typeVal     = document.getElementById('filterType').value;
     var supplierVal = document.getElementById('filterSupplier').value;
     var priorityVal = document.getElementById('filterPriority').value;
 
-    var cards = document.querySelectorAll('#excList .exc-card');
     var shown = 0;
-    var divider = document.getElementById('auto-resolved-divider');
 
+    // ── Filter card view ─────────────────────────────────────
+    var cards = document.querySelectorAll('#excList .exc-card');
     cards.forEach(function(card) {
-      // Skip the divider (not a card), skip cards already hidden by dismiss/accept animation
-      if (card === divider) return;
-      // Skip dynamically inserted resolved cards (they have -resolved suffix id)
       if (card.id && card.id.indexOf('-resolved') !== -1) { shown++; return; }
-      // Skip hidden-by-dismiss cards
       if (card.classList.contains('dismissed')) return;
-      // Skip cards hidden by accept animation (display:none)
       if (card.style.display === 'none') return;
 
       var cardType     = card.getAttribute('data-type') || '';
@@ -1320,7 +1541,6 @@
         card.style.opacity    = '';
         shown++;
       } else {
-        // Collapse filtered-out cards without removing from DOM
         card.style.visibility  = 'hidden';
         card.style.maxHeight   = '0';
         card.style.overflow    = 'hidden';
@@ -1328,12 +1548,33 @@
         card.style.opacity     = '0';
       }
     });
-
-    // Also count dynamically inserted resolved cards
     document.querySelectorAll('[id$="-resolved"]').forEach(function(c) { shown++; });
 
-    document.getElementById('filterShowCount').textContent = shown;
-    document.getElementById('inboxCount').textContent = shown;
+    // ── Filter table view ────────────────────────────────────
+    var tblShown = 0;
+    var tblRows = document.querySelectorAll('#tblView tbody tr');
+    tblRows.forEach(function(row) {
+      if (row.classList.contains('tbl-divider-row')) return;
+
+      var rowType     = row.getAttribute('data-type') || '';
+      var rowSupplier = row.getAttribute('data-supplier') || '';
+      var rowPri      = row.getAttribute('data-priority') || '';
+
+      var typeMatch     = typeVal === 'all'     || rowType === typeVal;
+      var supplierMatch = supplierVal === 'all' || rowSupplier === supplierVal;
+      var priorityMatch = priorityVal === 'all' || rowPri === priorityVal;
+
+      if (typeMatch && supplierMatch && priorityMatch) {
+        row.classList.remove('tbl-row-hidden');
+        tblShown++;
+      } else {
+        row.classList.add('tbl-row-hidden');
+      }
+    });
+
+    var count = currentView === 'table' ? tblShown : shown;
+    document.getElementById('filterShowCount').textContent = count;
+    document.getElementById('inboxCount').textContent = count;
   }
 </script>
 
