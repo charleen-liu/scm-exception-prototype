@@ -398,14 +398,14 @@
       <div class="breadcrumb">
         <a href="exception_management_card.html">Exception Management</a>
         <span class="breadcrumb-sep">/</span>
-        <span style="color:var(--label)">Exception Details</span>
+        <span id="exc-breadcrumb-label" style="color:var(--label)">Exception Details</span>
         <span class="breadcrumb-sep">/</span>
       </div>
 
       <!-- Title -->
       <div class="obj-title-row">
-        <div class="obj-title">Forecast Alert: Commit Shortage — Volterra Components · Plant US01</div>
-        <div class="obj-subtitle">Critical commitment shortage detected for Weeks 4–6 production</div>
+        <div class="obj-title" id="exc-title">Forecast Alert: Commit Shortage — Volterra Components · Plant US01</div>
+        <div class="obj-subtitle" id="exc-subtitle">Critical commitment shortage detected for Weeks 4–6 production</div>
       </div>
 
       <!-- AI Recommendation card -->
@@ -415,25 +415,22 @@
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#da-ai)"><path d="M12 0C12.2475 2.04033e-05 12.4794 0.121993 12.6192 0.326274L15.8692 5.07776C16.05 5.34206 16.0426 5.69214 15.8516 5.94913L8.60158 15.7022C8.30639 16.0993 7.69364 16.0993 7.39844 15.7022L0.148377 5.94913C-0.0426493 5.69213 -0.0499916 5.34207 0.130799 5.07776L3.43747 0.253986C3.57884 0.0936257 3.78332 0 3.99997 0H12ZM9.16994 3.23441C9.27994 2.92338 9.7201 2.92338 9.83011 3.23441C10.2001 4.31779 10.68 4.8094 11.7598 5.17057C12.0798 5.28093 12.0798 5.73255 11.7598 5.83288C10.68 6.20408 10.1901 6.68566 9.83011 7.76904C9.7201 8.08007 9.27994 8.08007 9.16994 7.76904C8.79998 6.68567 8.31999 6.19405 7.24024 5.83288C6.92024 5.72252 6.92024 5.2709 7.24024 5.17057C8.31999 4.79937 8.80998 4.31778 9.16994 3.23441Z" fill="#0057b8"/></g><defs><clipPath id="da-ai"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
             <strong>AI Recommendation</strong>
           </div>
-          <div class="ai-rec-body">
-            Volterra Components has an active commit shortage of <strong>80 units/week</strong> (largest single material shortage this week). Need-by date is in 9 days. All three signals point to the same underlying fulfilment risk. Addressing Volterra directly is likely to resolve all three simultaneously.
-          </div>
+          <div class="ai-rec-body" id="exc-ai-rec-body"></div>
         </div>
         <div class="ai-rec-card-right">
-          Agent recommends email supplier about this situation and ask for how to resolve it.
-          <div class="ai-rec-links">
+          <div class="ai-rec-links" id="exc-ai-links">
             <a class="ai-rec-link">• Forecast Alert Document ID: FA-2026-0324-001</a>
             <a class="ai-rec-link">• Purchase Orders 4500001010–1012</a>
           </div>
           <div class="ai-rec-actions">
-            <button class="btn-accept" id="acceptBtn" onclick="acceptRec()">Accept</button>
+            <button class="btn-accept" id="exc-ai-action-btn" onclick="acceptRec()">Accept</button>
             <button class="btn-dismiss" onclick="dismissRec()">Dismiss</button>
           </div>
         </div>
       </div>
 
       <!-- Tab bar -->
-      <div class="tab-bar">
+      <div class="tab-bar" id="exc-tab-bar">
         <button class="tab-item active" onclick="switchTab(this)">Projected Commits</button>
         <button class="tab-item" onclick="switchTab(this)">Impacted</button>
         <button class="tab-item" onclick="switchTab(this)">Alternative</button>
@@ -461,7 +458,7 @@
         </div>
 
         <table class="data-table">
-          <thead>
+          <thead id="exc-thead">
             <tr>
               <th class="cb-col"><input type="checkbox" id="chkAll" onclick="toggleAll(this)"/></th>
               <th>Alert Created Date</th>
@@ -476,7 +473,7 @@
               <th></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="exc-tbody">
             <tr>
               <td class="cb-col"><input type="checkbox"/></td>
               <td>Dec 08, 2025</td>
@@ -556,11 +553,126 @@
 </div><!-- /app-body -->
 
 <script>
+  /* ── Per-exception data ─────────────────────────────────── */
+  var EXC_DATA = {
+    1: {
+      title: 'Forecast Alert: Commit Shortage — Volterra Components · Plant US01 (Chicago)',
+      subtitle: 'Raw material shortage confirmed · Wks 4 & 6 · 12 parts affected · 60% commit rate',
+      breadcrumb: 'Forecast Exception — EXC-2026-001',
+      aiRec: 'Volterra Components has confirmed a raw material shortage at their US01 production line affecting <strong>12 parts across Wks 4 &amp; 6</strong>. Commit rate has fallen to 60% (408 of 680 units/wk), with ASN now tracking at only 45% (306 units). The cumulative erosion trail — Forecast 100% → OC 60% → ASN 45% — confirms a live supply loss at Plant US01. Agent has pre-drafted a shortage resolution request to Volterra with full supply context attached.',
+      aiAction: 'Accept &amp; Send shortage request to Volterra',
+      aiLinks: ['• Forecast Alert ID: FA-2026-0324-001', '• POs: 4500001010, 4500001011, 4500001012', '• Root cause logged: Mar 24, 2026 · Volterra confirmed'],
+      tabs: ['Projected Commits', 'Impacted POs', 'Alternative Sources', 'Inventory Forecast', 'Transfer Time', 'Supplier Chain Map', 'SC Relationship', 'Learning'],
+      tableHead: ['Alert Date', 'Supplier', 'Part Number', 'Location', 'Forecast', 'Commit', 'Gap', 'Wk of Exception', 'Wk of Impact'],
+      tableRows: [
+        ['Mar 24, 2026', 'Volterra Components GmbH', 'VLT-MC-4401', 'Plant US01 (Chicago)', '680', '408', '272', 'Wk 4', 'Wk 4'],
+        ['Mar 24, 2026', 'Volterra Components GmbH', 'VLT-MC-4402', 'Plant US01 (Chicago)', '680', '408', '272', 'Wk 4', 'Wk 5'],
+        ['Mar 24, 2026', 'Volterra Components GmbH', 'VLT-MC-4403', 'Plant US01 (Chicago)', '680', '408', '272', 'Wk 6', 'Wk 6'],
+        ['Mar 24, 2026', 'Volterra Components GmbH', 'VLT-MC-4404', 'Plant US01 (Chicago)', '560', '336', '224', 'Wk 4', 'Wk 5'],
+        ['Mar 24, 2026', 'Volterra Components GmbH', 'VLT-MC-4405', 'Plant US01 (Chicago)', '420', '252', '168', 'Wk 6', 'Wk 7'],
+        ['Mar 24, 2026', 'Volterra Components GmbH', 'VLT-MC-4406', 'Plant US01 (Chicago)', '300', '180', '120', 'Wk 4', 'Wk 6']
+      ],
+      forecastLink: true
+    },
+    2: {
+      title: 'ASN Exception: Hard Ship Date Breach — Apex Precision · Plant US03 (Austin)',
+      subtitle: 'PO-4500002201 · PN AP-7732-X · 520 units not shipped · Apr 1 line stoppage risk',
+      breadcrumb: 'ASN Exception — EXC-2026-002',
+      aiRec: 'Apex Precision (Vendor #5014) failed to ship PO-4500002201 by the hard ship date of <strong>Mar 24, 2026</strong>. No ASN has been posted. 520 units of PN AP-7732-X are required at Plant US03 Assembly Line 4 by Apr 1 to avoid line stoppage. Last communication from supplier was Mar 19 — no response since. Agent has identified one alternate source (Meridian Fasteners, 14-day lead time) and pre-drafted an expedite request to Apex with escalation context.',
+      aiAction: 'Send Expedite Request to Apex Precision',
+      aiLinks: ['• PO: 4500002201 · PN: AP-7732-X · 520 units', '• Hard ship date: Mar 24, 2026 (3 days overdue)', '• Alt source: Meridian Fasteners · 14-day lead time'],
+      tabs: ['ASN Status', 'PO Details', 'Delivery History', 'Alternative Sources', 'Contact Log', 'SC Relationship'],
+      tableHead: ['PO Number', 'Part Number', 'Supplier', 'Location', 'Qty Ordered', 'Qty Shipped', 'Hard Ship Date', 'Days Overdue', 'Status'],
+      tableRows: [
+        ['4500002201', 'AP-7732-X', 'Apex Precision · #5014', 'Plant US03 (Austin)', '520', '0', 'Mar 24, 2026', '3', 'NO ASN'],
+      ],
+      forecastLink: false
+    },
+    3: {
+      title: 'OC Exception: Deviation Batch — Volterra Components · Plant US01 (Chicago)',
+      subtitle: '27 open deviations · 24 in-tolerance ready to batch approve · 3 flagged for review',
+      breadcrumb: 'OC Exception — EXC-2026-003',
+      aiRec: 'Volterra Components has submitted OCs reflecting available capacity constrained by the confirmed raw material shortage (root cause linked from EXC-2026-001). Of <strong>27 open deviations</strong>, 24 are within the ±5% tolerance threshold and are recommended for batch approval. 3 deviations exceed tolerance and require individual review: PO-4500001010 (−15%), PO-4500001011 (−20%), PO-4500001012 (+10%). Oldest deviation is 14 days pending. Approving the 24 in-tolerance deviations will unblock downstream ASN processing.',
+      aiAction: 'Batch Approve 24 In-Tolerance Deviations',
+      aiLinks: ['• Linked to: EXC-2026-001 (Forecast shortage, same root cause)', '• Oldest pending: PO-4500001010 · 14 days', '• Tolerance rule: ±5% auto-approve threshold'],
+      tabs: ['OC Deviations', 'PO Details', 'Supplier Context', 'Approval History', 'SC Relationship'],
+      tableHead: ['PO Number', 'Part Number', 'Qty Ordered', 'Qty Confirmed', 'Deviation', 'Days Pending', 'Supplier Reason', 'Status'],
+      tableRows: [
+        ['4500001010', 'VLT-MC-4401', '500', '425', '−15%', '14', 'Capacity constraint · US01 line', 'FLAGGED'],
+        ['4500001011', 'VLT-MC-4402', '300', '240', '−20%', '12', 'Capacity constraint · US01 line', 'FLAGGED'],
+        ['4500001012', 'VLT-MC-4403', '200', '220', '+10%',  '11', 'Overrun — buffer stock allocated', 'FLAGGED'],
+        ['4500001013', 'VLT-MC-4404', '400', '392', '−2%',   '9',  'Capacity constraint · US01 line', 'IN TOLERANCE'],
+        ['4500001014', 'VLT-MC-4405', '350', '347', '−1%',   '8',  'Capacity constraint · US01 line', 'IN TOLERANCE'],
+        ['4500001015', 'VLT-MC-4406', '280', '275', '−2%',   '7',  'Capacity constraint · US01 line', 'IN TOLERANCE'],
+        ['+ 18 more', '—', '—', '—', 'All within ±4%', '≤7', 'Capacity constraint · US01 line', 'IN TOLERANCE'],
+      ],
+      forecastLink: false
+    }
+  };
+
+  function loadExcData() {
+    var params = new URLSearchParams(window.location.search);
+    var id = parseInt(params.get('exc')) || 1;
+    var d = EXC_DATA[id];
+    if (!d) return;
+
+    document.title = d.breadcrumb + ' — SAP Business Network';
+    document.getElementById('exc-breadcrumb-label').textContent = d.breadcrumb;
+    document.getElementById('exc-title').textContent = d.title;
+    document.getElementById('exc-subtitle').textContent = d.subtitle;
+    document.getElementById('exc-ai-rec-body').innerHTML = d.aiRec;
+    document.getElementById('exc-ai-action-btn').innerHTML = d.aiAction;
+    document.getElementById('exc-ai-links').innerHTML = d.aiLinks.map(function(l) {
+      return '<a class="ai-rec-link">' + l + '</a>';
+    }).join('');
+
+    // Tabs
+    var tabBar = document.getElementById('exc-tab-bar');
+    tabBar.innerHTML = d.tabs.map(function(t, i) {
+      return '<button class="tab-item' + (i === 0 ? ' active' : '') + '" onclick="switchTab(this)">' + t + '</button>';
+    }).join('');
+
+    // Table header
+    var thead = document.getElementById('exc-thead');
+    thead.innerHTML = '<tr><th class="cb-col"><input type="checkbox" onclick="toggleAll(this)"/></th>' +
+      d.tableHead.map(function(h) { return '<th>' + h + '</th>'; }).join('') + '<th></th></tr>';
+
+    // Table body
+    var tbody = document.getElementById('exc-tbody');
+    var delSvg = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM4.5 2.5v-1A2 2 0 0 1 6.5 0h3A2 2 0 0 1 11.5 1.5v1h2.25a.75.75 0 0 1 0 1.5H13v9A2 2 0 0 1 11 15H5A2 2 0 0 1 3 13V4H2.25a.75.75 0 0 1 0-1.5H4.5ZM4.5 4v9a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V4H4.5Z" fill="#556b82"/></svg>';
+    tbody.innerHTML = d.tableRows.map(function(row) {
+      var cells = row.map(function(cell, ci) {
+        // Forecast column (index 4 for exc=1) — link to forecast_detail
+        if (d.forecastLink && ci === 4) {
+          return '<td class="num val-blue"><a href="forecast_detail.html" class="tbl-link">' + cell + '</a></td>';
+        }
+        // Deviation column — color red if negative/large, green if ok
+        if ((id === 3 && ci === 4) || (id === 2 && ci === 7)) {
+          var isFlag = cell === 'NO ASN' || cell.indexOf('−15') !== -1 || cell.indexOf('−20') !== -1 || parseInt(cell) > 2;
+          return '<td class="num ' + (isFlag ? 'val-red' : '') + '">' + cell + '</td>';
+        }
+        // Status column — color by value
+        if (ci === row.length - 1 && (cell === 'FLAGGED' || cell === 'NO ASN')) {
+          return '<td><span style="color:#bb0000;font-weight:700;font-size:11px;">' + cell + '</span></td>';
+        }
+        if (ci === row.length - 1 && cell === 'IN TOLERANCE') {
+          return '<td><span style="color:#256f3a;font-weight:700;font-size:11px;">' + cell + '</span></td>';
+        }
+        var isNum = !isNaN(cell.replace(/[,−\-]/g,'')) && cell !== '—' && cell !== '';
+        return '<td' + (isNum ? ' class="num"' : '') + '>' + cell + '</td>';
+      }).join('');
+      return '<tr><td class="cb-col"><input type="checkbox"/></td>' + cells +
+        '<td><button class="del-btn" title="Remove">' + delSvg + '</button></td></tr>';
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', loadExcData);
+
   function acceptRec() {
     var card = document.getElementById('aiRecCard');
     card.style.background = '#f0fff4';
     card.style.borderColor = '#a3d9b0';
-    var btn = document.getElementById('acceptBtn');
+    var btn = document.getElementById('exc-ai-action-btn');
     btn.textContent = '✓ Accepted';
     btn.style.background = '#256f3a';
     btn.style.borderColor = '#256f3a';
