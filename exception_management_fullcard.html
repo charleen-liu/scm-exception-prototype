@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exception Management (Simple Cards) — SAP Business Network</title>
+  <title>Exception Management — SAP Business Network</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -347,97 +347,105 @@
       overflow-y: auto;
     }
 
-    /* ── Exception Cards — simplified ───────────────────────── */
+    /* ── Exception Cards (always-visible, no expand) ─────────── */
     .exc-list { display: flex; flex-direction: column; gap: 0; }
 
     .exc-card {
       background: #fff;
       border: 1px solid var(--border-mid);
-      border-left: 4px solid transparent;
       border-radius: var(--radius);
       margin-bottom: 8px;
       transition: box-shadow .15s;
       overflow: hidden;
-      padding: 14px 16px 12px 14px;
-      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 18px 14px 18px;
+      display: flex; gap: 14px;
     }
     .exc-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
     .exc-card.dismissed { opacity: 0.4; pointer-events: none; }
-    .exc-card.urgent-card { border-left-color: var(--urgent); }
-    .exc-card.high-card   { border-left-color: var(--high); }
-    .exc-card.info-card   { border-left-color: var(--info); }
 
-    /* Badge column */
-    .exc-badge-col {
-      display: flex; flex-direction: column; align-items: center;
-      gap: 8px; flex-shrink: 0; padding-top: 2px; min-width: 52px;
+    /* Left: priority dot */
+    .exc-priority-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 6px;
     }
+    .exc-priority-dot.urgent { background: var(--urgent); }
+    .exc-priority-dot.high   { background: var(--high); }
+    .exc-priority-dot.medium { background: #e9730c; }
+    .exc-priority-dot.info   { background: var(--info); }
+
+    /* Middle: card body */
+    .exc-card-body { flex: 1; min-width: 0; }
+
+    .exc-card-header {
+      display: flex; align-items: flex-start; gap: 8px;
+      margin-bottom: 4px;
+    }
+    .exc-title {
+      font-size: 14px; font-weight: 700; color: var(--title);
+      line-height: 1.35; flex: 1;
+    }
+
     .exc-badge {
-      font-size: 11px; font-weight: 700; padding: 2px 8px;
-      border-radius: 10px; white-space: nowrap; text-align: center;
+      font-size: 11px; font-weight: 700; padding: 2px 7px;
+      border-radius: 10px; white-space: nowrap; flex-shrink: 0;
+      margin-top: 1px;
     }
     .badge-urgent { background: #fff2f2; color: var(--urgent); }
     .badge-high   { background: #fff4ec; color: var(--high); }
+    .badge-medium { background: #fff8ee; color: #e9730c; }
     .badge-info   { background: var(--info-bg); color: var(--info); }
+    .badge-auto   { background: #f0faf4; color: var(--positive); }
     .badge-done   { background: #e8f7ee !important; color: var(--positive) !important; }
-    .exc-conf {
-      font-size: 10px; color: var(--label); text-align: center;
-      line-height: 1.2;
-    }
-    .exc-type-tag {
-      font-size: 10px; font-weight: 600; color: var(--label);
-      text-transform: uppercase; letter-spacing: .04em; text-align: center;
-    }
 
-    /* Card body */
-    .exc-card-body { flex: 1; min-width: 0; }
-    .exc-title {
-      font-size: 14px; font-weight: 700; color: var(--title);
-      line-height: 1.35; margin-bottom: 8px;
-    }
-
-    /* Signal chips */
-    .exc-signals {
-      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
-    }
-    .sig-chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 11.5px; padding: 3px 9px; border-radius: 12px;
-      border: 1px solid var(--border); background: #f9fafb; color: var(--title);
-    }
-    .sig-chip-label {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .04em; color: var(--label);
-    }
-    .sig-chip.cost { background: #fff2f2; border-color: #f5c0c0; color: var(--urgent); font-weight: 700; }
-    .sig-chip.ok   { background: #f0faf4; border-color: #b8dfc7; color: var(--positive); }
-    .sig-chip.warn { background: #fff8f0; border-color: #f5d9b8; color: var(--high); font-weight: 700; }
-    .sig-chip.neutral { background: #f5f6f7; border-color: var(--border); color: var(--title); }
-
-    /* Compact erosion trail pill */
-    .exc-erosion-inline {
-      display: inline-flex; align-items: center; gap: 3px;
-      background: #f5f6f7; border: 1px solid var(--border);
-      border-radius: 12px; padding: 3px 10px;
-      font-size: 12px; color: var(--title);
+    .exc-problem {
+      font-size: 13px; color: var(--label); line-height: 1.5;
       margin-bottom: 8px;
     }
-    .er-step { font-weight: 700; }
-    .er-step.crit { color: var(--urgent); }
-    .er-arrow { color: #bcc9d4; margin: 0 1px; }
-    .er-label { font-size: 10px; color: var(--label); margin-right: 4px; font-weight: 600; text-transform: uppercase; }
 
-    /* OC mini-table */
-    .exc-table-wrap { overflow-x: auto; margin: 6px 0 8px; }
+    .exc-facts { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-bottom: 6px; }
+    .exc-fact { display: flex; gap: 6px; font-size: 12px; align-items: baseline; }
+    .exc-fact-label {
+      font-weight: 700; color: var(--label); text-transform: uppercase;
+      letter-spacing: .05em; white-space: nowrap; flex-shrink: 0;
+    }
+    .exc-fact-val { color: var(--title); line-height: 1.4; }
+    .exc-fact-val.cost { color: var(--urgent); font-weight: 700; }
+    .exc-fact-val.ok { color: var(--positive); }
+
+    .exc-meta-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 6px; flex-wrap: wrap;
+    }
+    .exc-meta-pill { font-size: 11px; color: var(--label); }
+    .exc-meta-sep  { color: var(--border-mid); font-size: 11px; }
+    .exc-meta-date { font-size: 11px; color: var(--label); }
+    .exc-meta-conf { font-size: 11px; color: var(--label); }
+
+    /* Erosion trail (always visible inside card) */
+    .exc-erosion-trail {
+      display: flex; align-items: center;
+      background: #f5f6f7; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 8px 12px;
+      margin: 8px 0; flex-wrap: wrap; gap: 4px;
+    }
+    .erosion-step { text-align: center; padding: 0 10px; }
+    .erosion-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--label); margin-bottom: 2px; }
+    .erosion-val { font-size: 15px; font-weight: 700; color: var(--title); }
+    .erosion-val.critical { color: var(--urgent); }
+    .erosion-sub { font-size: 10px; color: var(--label); margin-top: 1px; }
+    .erosion-arrow { color: #bcc9d4; font-size: 18px; padding: 0 4px; }
+
+    /* OC deviation table */
+    .exc-table-wrap { overflow-x: auto; margin: 8px 0; }
     .exc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .exc-table th {
-      text-align: left; padding: 4px 10px;
+      text-align: left; padding: 5px 10px;
       font-size: 11px; font-weight: 700; text-transform: uppercase;
       letter-spacing: .05em; color: var(--label);
       border-bottom: 1px solid var(--border); background: #f5f6f7;
     }
     .exc-table td {
-      padding: 5px 10px; border-bottom: 1px solid var(--border);
+      padding: 6px 10px; border-bottom: 1px solid var(--border);
       color: var(--title); vertical-align: middle;
     }
     .cell-warn { color: var(--urgent); font-weight: 700; }
@@ -446,36 +454,29 @@
     .pill-flag { background: #fff0e6; color: var(--urgent); }
     .pill-ok   { background: #e8f7ee; color: var(--positive); }
 
-    /* Meta row */
-    .exc-meta-row {
-      display: flex; align-items: center; gap: 6px;
-      flex-wrap: wrap;
-    }
-    .exc-meta-pill { font-size: 11px; color: var(--label); }
-    .exc-meta-sep  { color: var(--border-mid); font-size: 11px; }
-
-    /* Action column */
+    /* Right: action cluster (top-right corner) */
     .exc-card-actions {
       display: flex; flex-direction: column; gap: 6px;
-      flex-shrink: 0; align-items: stretch;
-      min-width: 148px; padding-top: 2px;
+      flex-shrink: 0; align-items: flex-end;
+      padding-top: 0;
     }
     .exc-btn-cta {
-      width: 100%; height: 32px; font-size: 13px; font-family: inherit;
-      font-weight: 600; border-radius: var(--radius-sm);
+      font-size: 13px; font-family: inherit;
+      padding: 0 14px; height: 30px; border-radius: var(--radius-sm);
       cursor: pointer; white-space: nowrap;
-      display: inline-flex; align-items: center; justify-content: center;
+      display: inline-flex; align-items: center;
       background: #0064d9; border: 1px solid #0064d9; color: #fff;
     }
     .exc-btn-cta:hover { background: #0057c2; }
-    .exc-btn-cta.accepted { background: var(--positive); border-color: var(--positive); }
+    .exc-btn-cta.accepted {
+      background: var(--positive); border-color: var(--positive);
+    }
     .exc-card-sec-actions { display: flex; gap: 6px; }
     .exc-btn-modify {
-      flex: 1; font-size: 12px; font-family: inherit;
-      padding: 0 8px; height: 26px; border-radius: var(--radius-sm);
+      font-size: 12px; font-family: inherit;
+      padding: 0 10px; height: 26px; border-radius: var(--radius-sm);
       cursor: pointer; white-space: nowrap;
-      display: inline-flex; align-items: center; justify-content: center;
-      text-decoration: none;
+      display: inline-flex; align-items: center; text-decoration: none;
       background: #fff; border: 1px solid var(--border-mid); color: var(--title);
     }
     .exc-btn-modify:hover { background: #f5f6f7; }
@@ -544,6 +545,7 @@
     }
     .toolbar-filters { display: flex; gap: 8px; }
 
+    /* ── Two-column split + old exc/detail styles: removed ─── */
   </style>
 </head>
 <body>
@@ -762,7 +764,7 @@
 
       <!-- Exception List — cards -->
       <div class="list-toolbar">
-        <span class="list-title">Exception Inbox <span class="list-count">9</span></span>
+        <span class="list-title">Exception Inbox <span class="list-count">8</span></span>
         <div class="toolbar-filters">
           <select class="filter-select">
             <option value="all">All Types</option>
@@ -781,35 +783,36 @@
       <div class="exc-list" id="excList">
 
         <!-- Card 1 — Forecast shortage (Urgent) -->
-        <div class="exc-card urgent-card" id="exc1">
-          <div class="exc-badge-col">
-            <span class="exc-badge badge-urgent" id="badge1">Urgent</span>
-            <span class="exc-type-tag">Forecast</span>
-            <span class="exc-conf">96%</span>
-          </div>
+        <div class="exc-card" id="exc1">
+          <span class="exc-priority-dot urgent"></span>
           <div class="exc-card-body">
-            <div class="exc-title">Volterra Components shortage — Plant US01 at risk · Wks 4–6</div>
-            <div class="exc-signals">
-              <span class="sig-chip cost"><span class="sig-chip-label">Cost</span>$1,255,930</span>
-              <span class="sig-chip warn"><span class="sig-chip-label">OC</span>60% commit</span>
-              <span class="sig-chip warn"><span class="sig-chip-label">ASN</span>45% shipped</span>
-              <span class="sig-chip neutral"><span class="sig-chip-label">Root cause</span>Tier-2 material shortage</span>
+            <div class="exc-card-header">
+              <div class="exc-title">Send shortage request to Volterra Components — Plant US01 at risk</div>
+              <span class="exc-badge badge-urgent" id="badge1">Urgent</span>
             </div>
-            <div class="exc-erosion-inline">
-              <span class="er-label">Trail</span>
-              <span class="er-step">100%</span>
-              <span class="er-arrow">›</span>
-              <span class="er-step crit">60% OC</span>
-              <span class="er-arrow">›</span>
-              <span class="er-step crit">45% ASN</span>
-              <span style="font-size:11px;color:var(--label);margin-left:4px;">680→408→306 units/wk</span>
+            <div class="exc-problem">
+              Volterra Components committed only <strong>60% of forecast</strong> for Weeks 4–6 at Plant US01 (Chicago, IL). Supplier confirmed component shortage on Mar 24. Gap is now propagating into OC deviations and ASN shortfalls across 3 active POs. Agent has pre-drafted a shortage request with full supply context attached.
+            </div>
+            <div class="exc-facts">
+              <div class="exc-fact"><span class="exc-fact-label">Business Impact</span><span class="exc-fact-val">Production shortfall · Plant US01 · Wks 4–6 · 3 POs at risk</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Root Cause</span><span class="exc-fact-val">Tier-2 raw material shortage (confirmed by Volterra, Mar 24)</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Cost Impacted</span><span class="exc-fact-val cost">$1,255,930</span></div>
+            </div>
+            <div class="exc-erosion-trail">
+              <div class="erosion-step"><div class="erosion-label">Forecast</div><div class="erosion-val">100%</div><div class="erosion-sub">680 units/wk</div></div>
+              <div class="erosion-arrow">→</div>
+              <div class="erosion-step"><div class="erosion-label">OC Confirmed</div><div class="erosion-val critical">60%</div><div class="erosion-sub">408 units/wk</div></div>
+              <div class="erosion-arrow">→</div>
+              <div class="erosion-step"><div class="erosion-label">ASN Shipped</div><div class="erosion-val critical">45%</div><div class="erosion-sub">306 units/wk</div></div>
             </div>
             <div class="exc-meta-row">
+              <span class="exc-meta-pill">Forecast</span>
               <span class="exc-meta-pill">Volterra Components</span>
-              <span class="exc-meta-sep">·</span>
               <span class="exc-meta-pill">Plant US01</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 24, 2026</span>
+              <span class="exc-meta-date">Mar 24, 2026</span>
+              <span class="exc-meta-sep">·</span>
+              <span class="exc-meta-conf">Confidence 96%</span>
             </div>
           </div>
           <div class="exc-card-actions">
@@ -822,28 +825,29 @@
         </div>
 
         <!-- Card 2 — Hard ship date breach (Urgent) -->
-        <div class="exc-card urgent-card" id="exc2">
-          <div class="exc-badge-col">
-            <span class="exc-badge badge-urgent" id="badge2">Urgent</span>
-            <span class="exc-type-tag">ASN</span>
-            <span class="exc-conf">99%</span>
-          </div>
+        <div class="exc-card" id="exc2">
+          <span class="exc-priority-dot urgent"></span>
           <div class="exc-card-body">
-            <div class="exc-title">Apex Precision missed hard ship date — Apr 1 line stoppage risk</div>
-            <div class="exc-signals">
-              <span class="sig-chip cost"><span class="sig-chip-label">Cost</span>$843,200</span>
-              <span class="sig-chip warn"><span class="sig-chip-label">Overdue</span>Mar 24 deadline</span>
-              <span class="sig-chip warn"><span class="sig-chip-label">Units</span>520 not shipped</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Alt source</span>Meridian 14d lead</span>
+            <div class="exc-card-header">
+              <div class="exc-title">Apex Precision missed hard ship date — expedite or source alternate</div>
+              <span class="exc-badge badge-urgent" id="badge2">Urgent</span>
+            </div>
+            <div class="exc-problem">
+              Apex Precision (Vendor #5014) failed to ship PO-4500002201 by the hard ship date of <strong>Mar 24, 2026</strong>. No ASN received. 520 units of PN AP-7732-X needed at Plant US03 (Austin, TX) by Apr 1 to avoid line stoppage. Agent has identified one alternate source (Meridian Fasteners) with 14-day lead time and pre-drafted an expedite request to Apex.
+            </div>
+            <div class="exc-facts">
+              <div class="exc-fact"><span class="exc-fact-label">Business Impact</span><span class="exc-fact-val">Line stoppage risk · Plant US03 · Assembly Line 4 · Apr 1 deadline</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Root Cause</span><span class="exc-fact-val">No ASN posted · last communication Mar 19 (no response since)</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Cost Impacted</span><span class="exc-fact-val cost">$843,200</span></div>
             </div>
             <div class="exc-meta-row">
+              <span class="exc-meta-pill">ASN</span>
               <span class="exc-meta-pill">Apex Precision</span>
+              <span class="exc-meta-pill">Plant US03</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Plant US03 (Austin)</span>
+              <span class="exc-meta-date">Mar 25, 2026</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">PN AP-7732-X</span>
-              <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 25, 2026</span>
+              <span class="exc-meta-conf">Confidence 99%</span>
             </div>
           </div>
           <div class="exc-card-actions">
@@ -856,36 +860,34 @@
         </div>
 
         <!-- Card 3 — OC Deviations batch (High) -->
-        <div class="exc-card high-card" id="exc3">
-          <div class="exc-badge-col">
-            <span class="exc-badge badge-high" id="badge3">High</span>
-            <span class="exc-type-tag">OC</span>
-            <span class="exc-conf">94%</span>
-          </div>
+        <div class="exc-card" id="exc3">
+          <span class="exc-priority-dot high"></span>
           <div class="exc-card-body">
-            <div class="exc-title">17 OC deviations — 14 ready to batch-approve · 3 need review</div>
-            <div class="exc-signals">
-              <span class="sig-chip ok"><span class="sig-chip-label">Batch-ready</span>14 in tolerance</span>
-              <span class="sig-chip warn"><span class="sig-chip-label">Flagged</span>3 POs (&minus;15%, &minus;20%, +10%)</span>
-              <span class="sig-chip warn"><span class="sig-chip-label">Oldest</span>14 days pending</span>
+            <div class="exc-card-header">
+              <div class="exc-title">Batch-approve 14 in-tolerance OC deviations · escalate 3 flagged</div>
+              <span class="exc-badge badge-high" id="badge3">High</span>
+            </div>
+            <div class="exc-problem">
+              17 open OC deviations from Volterra Components at Plant US01. <strong>14 are within ±5% tolerance</strong> and ready for batch approval. 3 require manual review: PO-4500001010 (–15%, 75 units short), PO-4500001011 (–20%, 60 units short), PO-4500001012 (+10%, 20 units over). Oldest deviation is 14 days pending.
             </div>
             <div class="exc-table-wrap">
               <table class="exc-table">
-                <thead><tr><th>PO</th><th>Ordered</th><th>Confirmed</th><th>Dev</th><th>Status</th></tr></thead>
+                <thead><tr><th>PO Number</th><th>Qty Ordered</th><th>Qty Confirmed</th><th>Deviation</th><th>Status</th></tr></thead>
                 <tbody>
                   <tr><td>4500001010</td><td>500</td><td>425</td><td class="cell-warn">–15%</td><td><span class="badge-pill pill-flag">Flagged</span></td></tr>
                   <tr><td>4500001011</td><td>300</td><td>240</td><td class="cell-warn">–20%</td><td><span class="badge-pill pill-flag">Flagged</span></td></tr>
                   <tr><td>4500001012</td><td>200</td><td>220</td><td class="cell-ok">+10%</td><td><span class="badge-pill pill-flag">Flagged</span></td></tr>
-                  <tr><td colspan="4" style="color:#556b82;font-size:12px;">+ 14 in-tolerance deviations</td><td><span class="badge-pill pill-ok">In Tolerance</span></td></tr>
+                  <tr><td colspan="4" style="color:#556b82;font-size:12px;padding-top:6px;">+ 14 in-tolerance deviations ready for batch approval</td><td><span class="badge-pill pill-ok">In Tolerance</span></td></tr>
                 </tbody>
               </table>
             </div>
             <div class="exc-meta-row">
+              <span class="exc-meta-pill">Order Confirmation</span>
               <span class="exc-meta-pill">Volterra Components</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Plant US01</span>
+              <span class="exc-meta-date">Mar 24, 2026</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 24, 2026</span>
+              <span class="exc-meta-conf">Confidence 94%</span>
             </div>
           </div>
           <div class="exc-card-actions">
@@ -897,31 +899,34 @@
           </div>
         </div>
 
-        <!-- Card 4 — Quality hold Precision Metals (High) -->
-        <div class="exc-card high-card" id="exc4">
-          <div class="exc-badge-col">
-            <span class="exc-badge badge-high" id="badge4">High</span>
-            <span class="exc-type-tag">Quality</span>
-            <span class="exc-conf">93%</span>
-          </div>
+        <!-- Card 4 — Forecast Plant US02 (High, monitoring) -->
+        <div class="exc-card" id="exc4">
+          <span class="exc-priority-dot high"></span>
           <div class="exc-card-body">
-            <div class="exc-title">Precision Metals shipment on quality hold — 340 units blocked at Plant US01</div>
-            <div class="exc-signals">
-              <span class="sig-chip warn"><span class="sig-chip-label">On Hold</span>340 units · PO-4500001890</span>
-              <span class="sig-chip cost"><span class="sig-chip-label">Risk</span>Line delay if not cleared by Apr 2</span>
-              <span class="sig-chip neutral"><span class="sig-chip-label">Defect</span>Surface finish non-conformance</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Option</span>Conditional release available</span>
+            <div class="exc-card-header">
+              <div class="exc-title">Monitor Plant US02 forecast — 80% commit, potential inter-plant offset</div>
+              <span class="exc-badge badge-high" id="badge4">High</span>
+            </div>
+            <div class="exc-problem">
+              Plant US02 (Detroit, MI) showing <strong>80% commit rate for Weeks 4–6</strong>, above the 75% alert threshold. No OC deviations detected; ASN 800045340 tracking on schedule. If Plant US01 shortfall persists, US02 can partially offset via inter-plant transfer — agent estimates up to 120 units/week available.
+            </div>
+            <div class="exc-facts">
+              <div class="exc-fact"><span class="exc-fact-label">Commit Rate</span><span class="exc-fact-val">80% · 544 of 680 units confirmed · above 75% threshold</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Inter-plant Offset</span><span class="exc-fact-val">Up to 120 units/wk available from US02 if needed</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">ASN Status</span><span class="exc-fact-val ok">On track · ASN 800045340 · ETA Mar 30, 2026</span></div>
             </div>
             <div class="exc-meta-row">
-              <span class="exc-meta-pill">Precision Metals</span>
+              <span class="exc-meta-pill">Forecast</span>
+              <span class="exc-meta-pill">Volterra Components</span>
+              <span class="exc-meta-pill">Plant US02</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Plant US01 (Chicago)</span>
+              <span class="exc-meta-date">Mar 24, 2026</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 26, 2026</span>
+              <span class="exc-meta-conf">Confidence 91%</span>
             </div>
           </div>
           <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta4" onclick="acceptCard('exc4')">Request Disposition</button>
+            <button class="exc-btn-cta" id="cta4" onclick="acceptCard('exc4')">Acknowledge</button>
             <div class="exc-card-sec-actions">
               <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
               <button class="exc-btn-dismiss" onclick="dismissCard('exc4')">Dismiss</button>
@@ -929,30 +934,33 @@
           </div>
         </div>
 
-        <!-- Card 5 — Forecast Plant US02 (High, monitoring) -->
-        <div class="exc-card high-card" id="exc5">
-          <div class="exc-badge-col">
-            <span class="exc-badge badge-high" id="badge5">High</span>
-            <span class="exc-type-tag">Forecast</span>
-            <span class="exc-conf">91%</span>
-          </div>
+        <!-- Card 5 — OC aging Global Parts (Info) -->
+        <div class="exc-card" id="exc5">
+          <span class="exc-priority-dot info"></span>
           <div class="exc-card-body">
-            <div class="exc-title">Plant US02 at 80% commit — possible inter-plant offset for US01</div>
-            <div class="exc-signals">
-              <span class="sig-chip warn"><span class="sig-chip-label">Commit</span>80% · above 75% threshold</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Offset</span>120 units/wk available</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">ASN</span>On track · ETA Mar 30</span>
+            <div class="exc-card-header">
+              <div class="exc-title">Approve 6 aged OC deviations from Global Parts — all within tolerance</div>
+              <span class="exc-badge badge-info" id="badge5">Info</span>
+            </div>
+            <div class="exc-problem">
+              6 OC deviations from Global Parts Ltd (PO-4500002003–2008) have exceeded the <strong>10-day approval SLA</strong>. All 6 are within ±4% tolerance. This is the 3rd consecutive cycle with aging approvals from this supplier. Agent recommends enabling an auto-approval rule for deviations under ±5% to prevent recurrence.
+            </div>
+            <div class="exc-facts">
+              <div class="exc-fact"><span class="exc-fact-label">Oldest Pending</span><span class="exc-fact-val cost">14 days · PO-4500002003 · deviation –3.8%</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Pattern Detected</span><span class="exc-fact-val">3rd consecutive cycle with SLA breaches for this supplier</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Auto-rule Savings</span><span class="exc-fact-val ok">~25 min/cycle · covers ~80% of Global Parts deviations</span></div>
             </div>
             <div class="exc-meta-row">
-              <span class="exc-meta-pill">Volterra Components</span>
+              <span class="exc-meta-pill">Order Confirmation</span>
+              <span class="exc-meta-pill">Global Parts Ltd</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Plant US02 (Detroit)</span>
+              <span class="exc-meta-date">Mar 13, 2026</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 24, 2026</span>
+              <span class="exc-meta-conf">Confidence 88%</span>
             </div>
           </div>
           <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta5" onclick="acceptCard('exc5')">Acknowledge</button>
+            <button class="exc-btn-cta" id="cta5" onclick="acceptCard('exc5')">Approve All 6</button>
             <div class="exc-card-sec-actions">
               <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
               <button class="exc-btn-dismiss" onclick="dismissCard('exc5')">Dismiss</button>
@@ -960,64 +968,36 @@
           </div>
         </div>
 
-        <!-- Card 6 — OC aging Global Parts (Info) -->
-        <div class="exc-card info-card" id="exc6">
-          <div class="exc-badge-col">
-            <span class="exc-badge badge-info" id="badge6">Info</span>
-            <span class="exc-type-tag">OC</span>
-            <span class="exc-conf">88%</span>
-          </div>
+        <!-- Card 6 — ASN missing Simco (Info) -->
+        <div class="exc-card" id="exc6">
+          <span class="exc-priority-dot info"></span>
           <div class="exc-card-body">
-            <div class="exc-title">6 aged OC deviations from Global Parts — all in tolerance, SLA breached</div>
-            <div class="exc-signals">
-              <span class="sig-chip warn"><span class="sig-chip-label">Oldest</span>14 days · PO-4500002003</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">All</span>within ±4%</span>
-              <span class="sig-chip neutral"><span class="sig-chip-label">Pattern</span>3rd cycle breach</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Auto-rule</span>saves ~25 min/cycle</span>
+            <div class="exc-card-header">
+              <div class="exc-title">2 ASNs from Simco Electronics overdue — proactive alert already sent</div>
+              <span class="exc-badge badge-info" id="badge6">Info</span>
+            </div>
+            <div class="exc-problem">
+              ASNs for PO-4500003021 (250 units) and PO-4500003022 (180 units) were due <strong>Mar 26</strong> and have not been submitted. Risk is low — Simco has a 92% on-time ASN rate and no linked OC deviations. Agent has already sent a proactive notification to supplier contact J. Reyes at 08:14 today.
+            </div>
+            <div class="exc-facts">
+              <div class="exc-fact"><span class="exc-fact-label">Affected POs</span><span class="exc-fact-val">PO-4500003021 (250 units) · PO-4500003022 (180 units)</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Due Date</span><span class="exc-fact-val cost">Mar 26, 2026 · 1 day overdue</span></div>
+              <div class="exc-fact"><span class="exc-fact-label">Risk Level</span><span class="exc-fact-val ok">Low · supplier on-time rate 92% · no linked OC deviations</span></div>
             </div>
             <div class="exc-meta-row">
-              <span class="exc-meta-pill">Global Parts Ltd</span>
+              <span class="exc-meta-pill">ASN</span>
+              <span class="exc-meta-pill">Simco Electronics</span>
               <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 13, 2026</span>
+              <span class="exc-meta-date">Mar 27, 2026</span>
+              <span class="exc-meta-sep">·</span>
+              <span class="exc-meta-conf">Confidence 85%</span>
             </div>
           </div>
           <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta6" onclick="acceptCard('exc6')">Approve All 6</button>
+            <button class="exc-btn-cta" id="cta6" onclick="acceptCard('exc6')">Acknowledge</button>
             <div class="exc-card-sec-actions">
               <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
               <button class="exc-btn-dismiss" onclick="dismissCard('exc6')">Dismiss</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 7 — ASN missing Simco (Info) -->
-        <div class="exc-card info-card" id="exc7">
-          <div class="exc-badge-col">
-            <span class="exc-badge badge-info" id="badge7">Info</span>
-            <span class="exc-type-tag">ASN</span>
-            <span class="exc-conf">85%</span>
-          </div>
-          <div class="exc-card-body">
-            <div class="exc-title">2 Simco ASNs 1 day overdue — alert sent, low risk</div>
-            <div class="exc-signals">
-              <span class="sig-chip warn"><span class="sig-chip-label">Overdue</span>Mar 26 · 2 POs</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Risk</span>Low · 92% on-time rate</span>
-              <span class="sig-chip ok"><span class="sig-chip-label">Agent</span>Alert sent 08:14</span>
-              <span class="sig-chip neutral"><span class="sig-chip-label">Units</span>430 total</span>
-            </div>
-            <div class="exc-meta-row">
-              <span class="exc-meta-pill">Simco Electronics</span>
-              <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">PO-4500003021 · PO-4500003022</span>
-              <span class="exc-meta-sep">·</span>
-              <span class="exc-meta-pill">Mar 27, 2026</span>
-            </div>
-          </div>
-          <div class="exc-card-actions">
-            <button class="exc-btn-cta" id="cta7" onclick="acceptCard('exc7')">Acknowledge</button>
-            <div class="exc-card-sec-actions">
-              <a class="exc-btn-modify" href="exception_detail.html">Modify</a>
-              <button class="exc-btn-dismiss" onclick="dismissCard('exc7')">Dismiss</button>
             </div>
           </div>
         </div>
