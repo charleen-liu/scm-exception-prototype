@@ -289,11 +289,11 @@
       border:1px solid rgba(107,63,160,0.25);
       border-radius:6px;
       padding:5px 12px;
-      text-align:right;
+      text-align:center;
       line-height:1.5;
     ">
       <div style="font-size:11px;font-weight:700;color:#6b3fa0;letter-spacing:.3px;">In Progress · Ideation</div>
-      <div style="font-size:10px;color:#8a6ab0;">by Charleen · SAP BN × Aera</div>
+      <div style="font-size:10px;color:#8a6ab0;">SAP BN × Aera</div>
     </div>
   `;
   document.body.appendChild(wm);
