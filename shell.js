@@ -281,4 +281,22 @@
   const sidenavRoot = document.getElementById('bn-sidenav-root');
   if (shellRoot) shellRoot.outerHTML = shellHTML;
   if (sidenavRoot) sidenavRoot.outerHTML = sidenavHTML;
+
+  // ── Watermark ─────────────────────────────────────────────────
+  const wm = document.createElement('div');
+  wm.style.cssText = 'position:fixed;bottom:18px;right:24px;z-index:9999;pointer-events:none;';
+  wm.innerHTML = `
+    <div style="
+      background:rgba(107,63,160,0.08);
+      border:1px solid rgba(107,63,160,0.25);
+      border-radius:6px;
+      padding:5px 12px;
+      text-align:right;
+      line-height:1.5;
+    ">
+      <div style="font-size:11px;font-weight:700;color:#6b3fa0;letter-spacing:.3px;">In Progress · Ideation</div>
+      <div style="font-size:10px;color:#8a6ab0;">by Charleen · SAP BN × Aera</div>
+    </div>
+  `;
+  document.body.appendChild(wm);
 })();
