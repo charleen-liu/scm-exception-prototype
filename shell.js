@@ -265,7 +265,7 @@
   </div>
   <div class="bn-sidenav-footer">
     <div class="bn-sidenav-sep"></div>
-    <a href="admin.html" style="text-decoration:none;" title="Admin">
+    <a href="exception_rules_config.html" style="text-decoration:none;" title="Admin">
       <button class="bn-nav-item${activePage === 'admin' ? ' active' : ''}" title="Admin" style="width:48px;height:32px;">
         <span class="bn-nav-indicator"></span>
         <span class="bn-nav-icon-wrap">
