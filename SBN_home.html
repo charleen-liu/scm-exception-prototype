@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — SAP Business Network</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:      #0070f2;
+      --white:      #ffffff;
+      --page-bg:    #f5f6f7;
+      --title:      #1d2d3e;
+      --label:      #556b82;
+      --border:     #e5e5e5;
+      --border-mid: #d9d9d9;
+      --urgent:     #bb0000;
+      --high:       #e76500;
+      --info:       #0064d9;
+      --radius-sm:  4px;
+      --radius:     8px;
+    }
+
+    body {
+      font-family: "72", "72full", Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      background: var(--page-bg);
+      color: var(--title);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Notification Panel ───────────────────────────────── */
+    .notif-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      z-index: 500;
+    }
+    .notif-overlay.open { display: block; }
+    .notif-panel {
+      position: absolute;
+      top: 60px; right: 56px;
+      width: 380px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.14);
+      font-family: "72","72full",Arial,sans-serif;
+      overflow: hidden;
+    }
+    .notif-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .notif-header-title { font-size: 14px; font-weight: 700; color: #1d2d3e; }
+    .notif-header-actions { display: flex; align-items: center; gap: 12px; }
+    .notif-header-actions a {
+      font-size: 12px; color: #0064d9; text-decoration: none; cursor: pointer;
+    }
+    .notif-header-actions a:hover { text-decoration: underline; }
+    .notif-section-label {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 16px 6px;
+      font-size: 12px; font-weight: 700; color: #1d2d3e;
+    }
+    .notif-item {
+      padding: 12px 16px;
+      border-top: 1px solid #f0f0f0;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .notif-item:hover { background: #f7f8f9; cursor: pointer; }
+    .notif-item-icon { flex-shrink: 0; margin-top: 1px; }
+    .notif-item-body { flex: 1; min-width: 0; }
+    .notif-item-title {
+      font-size: 13px; font-weight: 700; color: #1d2d3e;
+      line-height: 1.4; margin-bottom: 4px;
+    }
+    .notif-item-desc {
+      font-size: 12px; color: #556b82; line-height: 1.45; margin-bottom: 5px;
+    }
+    .notif-item-time { font-size: 11px; color: #8a9baa; }
+    .notif-item-more {
+      flex-shrink: 0; color: #8a9baa; font-size: 16px;
+      line-height: 1; letter-spacing: 1px; padding: 2px;
+    }
+
+    /* ── Main scroll area ─────────────────────────────────────── */
+    .main {
+      flex: 1; min-width: 0;
+      overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── Welcome Banner ───────────────────────────────────────── */
+    .welcome-banner {
+      background: #0057b8;
+      padding: 20px 32px;
+      flex-shrink: 0;
+    }
+    .welcome-banner h1 {
+      font-size: 20px; font-weight: 700; color: #fff;
+      font-family: "72", "72full", Arial, sans-serif;
+    }
+
+    /* ── Page Content ─────────────────────────────────────────── */
+    .page-content {
+      padding: 24px 32px;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* ── Section Label ────────────────────────────────────────── */
+    .section-label {
+      font-size: 16px; font-weight: 700; color: var(--title);
+      margin-bottom: 12px;
+    }
+
+    /* ── KPI Row ──────────────────────────────────────────────── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    /* ── Generic Card ─────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 700; color: var(--title);
+      margin-bottom: 12px;
+    }
+
+    /* ── Supply Chain Exceptions card (clickable) ─────────────── */
+    .card-exceptions {
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .card-exceptions:hover {
+      border-color: #0064d9;
+      box-shadow: 0 2px 8px rgba(0,100,217,.15);
+    }
+    .exc-kpi-row {
+      display: flex; align-items: baseline; gap: 8px;
+      margin-bottom: 12px;
+    }
+    .exc-kpi-num {
+      font-size: 28px; font-weight: 700; color: var(--title);
+      line-height: 1;
+    }
+    .exc-kpi-label { font-size: 12px; color: var(--label); }
+
+    .exc-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0;
+      border-top: 1px solid var(--border);
+    }
+    .exc-icon { flex-shrink: 0; margin-top: 1px; }
+    .exc-text { flex: 1; min-width: 0; }
+    .exc-text-main { font-size: 12px; color: var(--title); line-height: 1.4; }
+    .exc-text-sub  { font-size: 11px; color: var(--label); margin-top: 1px; }
+    .exc-badge {
+      font-size: 10px; font-weight: 700; padding: 1px 5px;
+      border-radius: 3px; flex-shrink: 0; white-space: nowrap;
+      align-self: flex-start;
+    }
+    .exc-badge.urgent { background: #ffd0d0; color: #bb0000; }
+    .exc-badge.new    { background: #d3f0d3; color: #256f3a; }
+    .exc-badge.trend  { background: #fff4d3; color: #9c6500; }
+
+    .card-view-all {
+      display: block; text-align: right;
+      font-size: 12px; color: #0064d9;
+      margin-top: 10px; text-decoration: none;
+    }
+    .card-exceptions:hover .card-view-all { text-decoration: underline; }
+
+    /* ── Decorative KPI cards ─────────────────────────────────── */
+    .kpi-stat-num {
+      font-size: 26px; font-weight: 700; color: var(--title);
+      line-height: 1; margin-bottom: 4px;
+    }
+    .kpi-stat-change {
+      font-size: 12px; color: var(--label); margin-bottom: 12px;
+    }
+    .kpi-sparkline {
+      height: 56px; width: 100%;
+      background: linear-gradient(180deg, #eaf3ff 0%, #fff 100%);
+      border-radius: 4px;
+      position: relative; overflow: hidden;
+    }
+    .kpi-sparkline svg { width: 100%; height: 100%; }
+    .kpi-stat-footer {
+      font-size: 11px; color: var(--label);
+      margin-top: 8px;
+    }
+
+    /* Supply Chain Monitor decorative */
+    .scm-list { list-style: none; }
+    .scm-list li {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--title);
+    }
+    .scm-badge {
+      font-size: 11px; font-weight: 700;
+      padding: 1px 6px; border-radius: 10px;
+    }
+    .scm-badge.blue { background: #eaf3ff; color: #0064d9; }
+    .scm-badge.orange { background: #fff4e0; color: #e76500; }
+
+    /* ── Chart Row (lower tiles) ──────────────────────────────── */
+    .chart-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .chart-placeholder {
+      height: 100px; width: 100%;
+      background: var(--page-bg);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chart-placeholder svg { opacity: .4; }
+
+    /* ── SAP Footer ───────────────────────────────────────────── */
+    .sap-footer {
+      border-top: 1px solid var(--border);
+      padding: 10px 32px;
+      display: flex; align-items: center; gap: 16px;
+      flex-shrink: 0; background: #fff;
+    }
+    .sap-footer svg { flex-shrink: 0; }
+    .sap-footer-links {
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .sap-footer-links a {
+      font-size: 11px; color: var(--label); text-decoration: none;
+    }
+    .sap-footer-links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body data-page="home">
+
+<div id="bn-shell-root"></div>
+
+<div class="app-body">
+<div id="bn-sidenav-root"></div>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <h1>Welcome to SAP Business Network</h1>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ── Highlights ── -->
+      <div>
+        <div class="section-label">Highlights</div>
+        <div class="kpi-row">
+
+          <!-- Supply Chain Exceptions (clickable) -->
+          <div class="card card-exceptions" onclick="window.location='exception_management_card.html'" role="link" tabindex="0" aria-label="Supply Chain Exceptions — View all">
+            <div class="card-title">Supply Chain Exceptions</div>
+            <div class="exc-kpi-row">
+              <span class="exc-kpi-num">7</span>
+              <span class="exc-kpi-label">open exceptions</span>
+            </div>
+
+            <div class="exc-item">
+              <span class="exc-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="6" fill="#bb0000" fill-opacity=".12"/>
+                  <path d="M7 4v4M7 10h.01" stroke="#bb0000" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="exc-text">
+                <div class="exc-text-main">Forecast commit gap — 60%</div>
+                <div class="exc-text-sub">Volterra · Plant US01 · Weeks 4–6</div>
+              </div>
+              <span class="exc-badge urgent">Urgent</span>
+            </div>
+
+            <div class="exc-item">
+              <span class="exc-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="6" fill="#bb0000" fill-opacity=".12"/>
+                  <path d="M7 4v4M7 10h.01" stroke="#bb0000" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="exc-text">
+                <div class="exc-text-main">ASN partial shipment — 45%</div>
+                <div class="exc-text-sub">Volterra · 3 POs at risk · Week 6</div>
+              </div>
+              <span class="exc-badge urgent">Urgent</span>
+            </div>
+
+            <div class="exc-item">
+              <span class="exc-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="6" fill="#e76500" fill-opacity=".12"/>
+                  <path d="M7 4v4M7 10h.01" stroke="#e76500" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="exc-text">
+                <div class="exc-text-main">OC deviations need review</div>
+                <div class="exc-text-sub">17 POs · 3 flagged for escalation</div>
+              </div>
+              <span class="exc-badge trend">Trend</span>
+            </div>
+
+            <div class="exc-item">
+              <span class="exc-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="6" fill="#0064d9" fill-opacity=".1"/>
+                  <path d="M4 7l2 2 4-4" stroke="#0064d9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <div class="exc-text">
+                <div class="exc-text-main">Missing ASN confirmations</div>
+                <div class="exc-text-sub">Volterra Components · 2 shipments</div>
+              </div>
+              <span class="exc-badge new">New</span>
+            </div>
+
+            <div class="exc-item">
+              <span class="exc-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="6" fill="#556b82" fill-opacity=".1"/>
+                  <path d="M5 7h4M7 5v4" stroke="#556b82" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="exc-text">
+                <div class="exc-text-main">OC approvals due</div>
+                <div class="exc-text-sub">3 items · Due today</div>
+              </div>
+            </div>
+
+            <a class="card-view-all">View all →</a>
+          </div>
+
+          <!-- Purchase Orders (decorative) -->
+          <div class="card">
+            <div class="card-title">Purchase Orders</div>
+            <div class="kpi-stat-num">$76.5k</div>
+            <div class="kpi-stat-change">↑ Last 14 days</div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 120 56" preserveAspectRatio="none">
+                <polyline points="0,45 20,38 40,42 60,28 80,32 100,20 120,24"
+                  fill="none" stroke="#0064d9" stroke-width="2"/>
+                <polyline points="0,45 20,38 40,42 60,28 80,32 100,20 120,24 120,56 0,56"
+                  fill="#eaf3ff" stroke="none"/>
+              </svg>
+            </div>
+            <div class="kpi-stat-footer">Across all suppliers</div>
+          </div>
+
+          <!-- Invoices (decorative) -->
+          <div class="card">
+            <div class="card-title">Invoices</div>
+            <div class="kpi-stat-num">$12.7k</div>
+            <div class="kpi-stat-change">↓ Last 30 days</div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 120 56" preserveAspectRatio="none">
+                <polyline points="0,20 20,28 40,22 60,35 80,30 100,40 120,38"
+                  fill="none" stroke="#0064d9" stroke-width="2"/>
+                <polyline points="0,20 20,28 40,22 60,35 80,30 100,40 120,38 120,56 0,56"
+                  fill="#eaf3ff" stroke="none"/>
+              </svg>
+            </div>
+            <div class="kpi-stat-footer">All invoice types</div>
+          </div>
+
+          <!-- Supply Chain Monitor (decorative) -->
+          <div class="card">
+            <div class="card-title">Supply Chain Monitor</div>
+            <div class="kpi-stat-num" style="margin-bottom:8px;">64 <span style="font-size:13px;font-weight:400;color:var(--label);">alerts</span></div>
+            <ul class="scm-list">
+              <li>Order confirmations <span class="scm-badge blue">32</span></li>
+              <li>Inventory alerts <span class="scm-badge orange">8</span></li>
+              <li>Forecast <span class="scm-badge blue">12</span></li>
+              <li>Approvals due <span class="scm-badge orange">12</span></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Lower chart tiles (decorative) ── -->
+      <div>
+        <div class="chart-row">
+
+          <div class="card">
+            <div class="card-title">Light enrollment progress</div>
+            <div style="font-size:22px;font-weight:700;margin-bottom:4px;">21</div>
+            <div style="font-size:11px;color:var(--label);margin-bottom:8px;">Buyers to qualify</div>
+            <div class="chart-placeholder">
+              <svg width="80" height="48" viewBox="0 0 80 48">
+                <rect x="4"  y="20" width="12" height="28" rx="2" fill="#0064d9"/>
+                <rect x="20" y="10" width="12" height="38" rx="2" fill="#556b82" fill-opacity=".4"/>
+                <rect x="36" y="30" width="12" height="18" rx="2" fill="#0064d9"/>
+                <rect x="52" y="16" width="12" height="32" rx="2" fill="#556b82" fill-opacity=".4"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Full enrollment progress</div>
+            <div style="font-size:22px;font-weight:700;margin-bottom:4px;">3</div>
+            <div style="font-size:11px;color:var(--label);margin-bottom:8px;">All weeks</div>
+            <div class="chart-placeholder">
+              <svg width="80" height="48" viewBox="0 0 80 48">
+                <rect x="4"  y="28" width="12" height="20" rx="2" fill="#0064d9"/>
+                <rect x="20" y="14" width="12" height="34" rx="2" fill="#e76500" fill-opacity=".7"/>
+                <rect x="36" y="20" width="12" height="28" rx="2" fill="#0064d9"/>
+                <rect x="52" y="8"  width="12" height="40" rx="2" fill="#e76500" fill-opacity=".7"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Invoice status partial suppliers</div>
+            <div style="font-size:22px;font-weight:700;margin-bottom:4px;">3</div>
+            <div style="font-size:11px;color:var(--label);margin-bottom:8px;">All Countries</div>
+            <div class="chart-placeholder">
+              <svg width="80" height="48" viewBox="0 0 80 48">
+                <rect x="4"  y="16" width="12" height="32" rx="2" fill="#0064d9"/>
+                <rect x="20" y="24" width="12" height="24" rx="2" fill="#e76500" fill-opacity=".6"/>
+                <rect x="36" y="10" width="12" height="38" rx="2" fill="#6bb700" fill-opacity=".7"/>
+                <rect x="52" y="20" width="12" height="28" rx="2" fill="#0064d9"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Track your shipments</div>
+            <div style="font-size:12px;color:var(--label);margin-bottom:10px;">Enter Purchase Order Shipment</div>
+            <div style="display:flex;gap:6px;">
+              <input style="flex:1;border:1px solid var(--border-mid);border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;outline:none;color:var(--label);" placeholder="PO number" readonly />
+              <button style="background:#0064d9;color:#fff;border:none;border-radius:4px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;">Track</button>
+            </div>
+            <div style="margin-top:16px;display:flex;justify-content:center;">
+              <svg width="64" height="48" viewBox="0 0 64 48" fill="none">
+                <circle cx="32" cy="28" r="18" fill="#eaf3ff"/>
+                <path d="M18 30 Q32 10 46 30" stroke="#0064d9" stroke-width="2" fill="none"/>
+                <circle cx="32" cy="14" r="4" fill="#0064d9"/>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="sap-footer" style="margin-top:auto;">
+      <svg width="24" height="16" viewBox="0 0 24 16" fill="none">
+        <rect width="24" height="16" rx="2" fill="#009DE0"/>
+        <text x="12" y="11.5" text-anchor="middle" font-family="Arial" font-size="7" font-weight="700" fill="#fff">SAP</text>
+      </svg>
+      <div class="sap-footer-links">
+        <a href="#">Cookie Preferences</a>
+        <a href="#">Cookie Statement</a>
+        <a href="#">Legal Disclosure</a>
+        <a href="#">Terms of Use</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Notification Panel ─────────────────────────────── -->
+<div class="notif-overlay" id="notif-overlay">
+  <div class="notif-panel">
+    <div class="notif-header">
+      <span class="notif-header-title">Notifications (3)</span>
+      <div class="notif-header-actions">
+        <a>View All</a>
+      </div>
+    </div>
+
+    <div class="notif-section-label">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="#e76500"/>
+      </svg>
+      Important
+    </div>
+
+    <div class="notif-item">
+      <span class="notif-item-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1L1 14h14L8 1z" fill="#e76500" fill-opacity=".15" stroke="#e76500" stroke-width="1.2"/>
+          <path d="M8 6v4M8 11.5h.01" stroke="#e76500" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <div class="notif-item-body">
+        <div class="notif-item-title">Forecast Commit Gap — Volterra Components</div>
+        <div class="notif-item-desc">Volterra confirmed only 60% of forecast for Plant US01, Weeks 4–6. Cumulative erosion: Forecast 100% → OC 60% → ASN 45%. Stockout risk across 3 production lines.</div>
+        <div class="notif-item-time">Today, 08:14 AM</div>
+      </div>
+      <span class="notif-item-more">···</span>
+    </div>
+
+    <div class="notif-item">
+      <span class="notif-item-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1L1 14h14L8 1z" fill="#e76500" fill-opacity=".15" stroke="#e76500" stroke-width="1.2"/>
+          <path d="M8 6v4M8 11.5h.01" stroke="#e76500" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <div class="notif-item-body">
+        <div class="notif-item-title">ASN Partial Shipment — 45% Received</div>
+        <div class="notif-item-desc">Volterra's latest ASN covers only 45% of the confirmed OC quantity for Week 6. 3 POs are at risk of line stoppage. No revised ETA provided by supplier.</div>
+        <div class="notif-item-time">Today, 07:52 AM</div>
+      </div>
+      <span class="notif-item-more">···</span>
+    </div>
+
+    <div class="notif-item">
+      <span class="notif-item-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1L1 14h14L8 1z" fill="#e76500" fill-opacity=".15" stroke="#e76500" stroke-width="1.2"/>
+          <path d="M8 6v4M8 11.5h.01" stroke="#e76500" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <div class="notif-item-body">
+        <div class="notif-item-title">3 OC Deviations Require Escalation</div>
+        <div class="notif-item-desc">Of 17 open OC deviations from Volterra Components, 3 exceed tolerance thresholds and cannot be auto-approved. Manual review required before Week 5 cut-off.</div>
+        <div class="notif-item-time">Yesterday, 04:30 PM</div>
+      </div>
+      <span class="notif-item-more">···</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Keyboard accessibility for the exceptions card
+  document.querySelector('.card-exceptions').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      window.location = 'exception_management_card.html';
+    }
+  });
+
+  // Notification panel toggle
+  document.addEventListener('DOMContentLoaded', function() {
+    var overlay = document.getElementById('notif-overlay');
+    document.addEventListener('click', function(e) {
+      var btn = document.getElementById('bn-notif-btn');
+      if (btn && btn.contains(e.target)) {
+        overlay.classList.toggle('open');
+      } else if (!overlay.querySelector('.notif-panel').contains(e.target)) {
+        overlay.classList.remove('open');
+      }
+    });
+  });
+</script>
+
+<script src="shell.js"></script>
+
+</body>
+</html>
